@@ -19,3 +19,6 @@ steps:
 
 images:
   - 'europe-west9-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
