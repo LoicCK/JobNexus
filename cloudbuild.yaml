@@ -16,6 +16,8 @@ steps:
       - '--region'
       - 'europe-west9'
       - '--allow-unauthenticated'
+      - '--set-secrets'
+      - 'FT_CLIENT_ID=france-travail-id:latest,FT_CLIENT_SECRET=france-travail-secret:latest'
 
 images:
   - 'europe-west9-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app'
