@@ -24,3 +24,4 @@ dev = [
     "black (>=25.11.0,<26.0.0)",
     "ruff (>=0.14.6,<0.15.0)"
 ]
+package-mode = false
