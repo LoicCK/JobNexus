@@ -1,0 +1,21 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'europe-west9-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app', '.']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'europe-west9-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app']
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'jobnexus-service'
+      - '--image'
+      - 'europe-west9-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app'
+      - '--region'
+      - 'europe-west9'
+      - '--allow-unauthenticated'
+
+images:
+  - 'europe-west9-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app'
