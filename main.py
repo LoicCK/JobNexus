@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import os
+from services.labonnealternance import LaBonneAlternanceService
 
 app = FastAPI(title="JobNexus")
 
@@ -17,7 +18,16 @@ def read_root():
 def read_health():
     return {"status":"healthy"}
 
+
 @app.get("/jobs")
-def get_jobs():
-    return [{"titre":"Boulanger","entreprise":"Boulangerie truc"},
-            {"titre":"Conducteur PL H/F", "entreprise":"JP"}]
+def get_jobs(rome: str = "M1805"):
+    api_key = os.environ.get("LBA_API_KEY", "")
+
+    service = LaBonneAlternanceService(api_key)
+
+    jobs = service.search_jobs(romes=rome)
+
+    return {
+        "count": len(jobs),
+        "results": jobs
+    }
