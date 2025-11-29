@@ -53,10 +53,10 @@ class RomeService:
         rome_codes = []
 
         for res in resultats:
-            print(res)
+            metier = res.get("metier",{})
             code = RomeCode(
                 libelle=res.get("libelle","Libellé non défini"),
-                code=f"M{res.get('code', '0')}"
+                code=metier.get('code', '0')
             )
             rome_codes.append(code)
 
