@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import os
 from services.labonnealternance import LaBonneAlternanceService
+from services.rome import RomeService
 
 app = FastAPI(title="JobNexus")
 
@@ -30,4 +31,18 @@ def get_jobs(rome: str = "M1805"):
     return {
         "count": len(jobs),
         "results": jobs
+    }
+
+@app.get("/rome")
+def get_rome_codes(q: str = "boulanger"):
+    client_id = os.environ.get("FT_CLIENT_ID")
+    client_secret = os.environ.get("FT_CLIENT_SECRET")
+
+    service = RomeService(client_id, client_secret)
+
+    codes = service.search_rome(q)
+
+    return {
+        "count":len(codes),
+        "results":codes
     }
