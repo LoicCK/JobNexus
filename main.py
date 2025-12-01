@@ -7,6 +7,8 @@ from services.rome import RomeService
 ft_id = os.environ.get("FT_CLIENT_ID")
 ft_secret = os.environ.get("FT_CLIENT_SECRET")
 lba_key = os.environ.get("LBA_API_KEY")
+wttj_app_id = os.environ.get("WTTJ_APP_ID")
+wttj_api_key = os.environ.get("WTTJ_API_KEY")
 
 rome_service = RomeService(ft_id, ft_secret)
 lba_service = LaBonneAlternanceService(lba_key)
