@@ -10,8 +10,11 @@ class OrchestratorService:
         self.rome_service = rome_service
         self.wttj_service = wttj_service
 
-    def find_jobs_by_query(self, query: str,  longitude: float, latitude: float, radius: int, insee: str, romes: str) -> List[Job]:
+    def find_jobs_by_query(self, query: str,  longitude: float, latitude: float, radius: int, insee: str) -> List[Job]:
         romes = self.rome_service.search_rome(query)
+        if not romes:
+            print("Aucun ROME trouvé")
+            return self.wttj_service.search_jobs(query, longitude, latitude, radius)
         codes = [rome.code for rome in romes]
         codes = ",".join(codes)
         jobs = self.lba_service.search_jobs(longitude, latitude, radius, insee, codes)

@@ -63,7 +63,7 @@ def get_jobs_by_query(q: str = "ingénieur cloud",
                       radius: int = 30,
                       insee: str = "75056",
                       romes: str = "M1805"):
-    jobs = orchestrator_service.find_jobs_by_query(q, longitude, latitude, radius, insee, romes)
+    jobs = orchestrator_service.find_jobs_by_query(q, longitude, latitude, radius, insee)
 
     return {
         "count":len(jobs),
