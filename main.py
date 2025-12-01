@@ -3,6 +3,7 @@ import os
 from services.labonnealternance import LaBonneAlternanceService
 from services.orchestrator import OrchestratorService
 from services.rome import RomeService
+from services.wttj import WelcomeService
 
 ft_id = os.environ.get("FT_CLIENT_ID")
 ft_secret = os.environ.get("FT_CLIENT_SECRET")
@@ -12,6 +13,7 @@ wttj_api_key = os.environ.get("WTTJ_API_KEY")
 
 rome_service = RomeService(ft_id, ft_secret)
 lba_service = LaBonneAlternanceService(lba_key)
+wttj_service = WelcomeService(wttj_app_id, wttj_api_key)
 
 orchestrator_service = OrchestratorService(lba_service, rome_service)
 
@@ -42,7 +44,7 @@ def get_jobs(rome: str = "M1805"):
     }
 
 @app.get("/rome")
-def get_rome_codes(q: str = "boulanger"):
+def get_rome_codes(q: str = "ingénieur cloud"):
     codes = rome_service.search_rome(q)
 
     return {
@@ -51,10 +53,19 @@ def get_rome_codes(q: str = "boulanger"):
     }
 
 @app.get("/search")
-def get_jobs_by_query(q: str = "boulanger"):
+def get_jobs_by_query(q: str = "ingénieur cloud"):
     jobs = orchestrator_service.find_jobs_by_query(q)
 
     return {
         "count":len(jobs),
         "results":jobs
+    }
+
+@app.get("/wttj")
+def get_jobs_by_wttj(q: str = "ingénieur cloud"):
+    wttj_jobs = wttj_service.search_jobs(q)
+
+    return {
+        "count":len(wttj_jobs),
+        "results":wttj_jobs
     }
