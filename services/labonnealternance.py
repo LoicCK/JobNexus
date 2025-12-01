@@ -8,13 +8,7 @@ class LaBonneAlternanceService:
         self.api_key = api_key
         self.url = "https://labonnealternance.apprentissage.beta.gouv.fr/api/v1/jobs"
 
-    def search_jobs(self,
-                    longitude: float = 2.3522,
-                    latitude: float = 48.8566,
-                    radius: int = 30,
-                    insee: str = "75056",
-                    romes: str = "M1805",
-                    caller: str = "jobnexus") -> List[Job]:
+    def search_jobs(self, longitude: float, latitude: float, radius: int, insee: str, romes: str) -> List[Job]:
 
         params = {
             "longitude": longitude,
@@ -22,7 +16,7 @@ class LaBonneAlternanceService:
             "insee":insee,
             "radius": radius,
             "romes": romes,
-            "caller": caller,
+            "caller": "jobnexus",
             "sources": "offres,matcha,lba"
         }
 

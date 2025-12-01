@@ -15,7 +15,7 @@ rome_service = RomeService(ft_id, ft_secret)
 lba_service = LaBonneAlternanceService(lba_key)
 wttj_service = WelcomeService(wttj_app_id, wttj_api_key)
 
-orchestrator_service = OrchestratorService(lba_service, rome_service)
+orchestrator_service = OrchestratorService(lba_service, rome_service, wttj_service)
 
 app = FastAPI(title="JobNexus")
 
@@ -34,9 +34,13 @@ def read_health():
     return {"status":"healthy"}
 
 
-@app.get("/jobs")
-def get_jobs(rome: str = "M1805"):
-    jobs = lba_service.search_jobs(romes=rome)
+@app.get("/lba")
+def get_jobs_by_lba(longitude: float = 2.3522,
+             latitude: float = 48.8566,
+             radius: int = 30,
+             insee: str = "75056",
+             romes: str = "M1805"):
+    jobs = lba_service.search_jobs(longitude, latitude, radius, insee, romes)
 
     return {
         "count": len(jobs),
@@ -53,8 +57,13 @@ def get_rome_codes(q: str = "ingénieur cloud"):
     }
 
 @app.get("/search")
-def get_jobs_by_query(q: str = "ingénieur cloud"):
-    jobs = orchestrator_service.find_jobs_by_query(q)
+def get_jobs_by_query(q: str = "ingénieur cloud",
+                      longitude: float = 2.3522,
+                      latitude: float = 48.8566,
+                      radius: int = 30,
+                      insee: str = "75056",
+                      romes: str = "M1805"):
+    jobs = orchestrator_service.find_jobs_by_query(q, longitude, latitude, radius, insee, romes)
 
     return {
         "count":len(jobs),
@@ -62,8 +71,11 @@ def get_jobs_by_query(q: str = "ingénieur cloud"):
     }
 
 @app.get("/wttj")
-def get_jobs_by_wttj(q: str = "ingénieur cloud"):
-    wttj_jobs = wttj_service.search_jobs(q)
+def get_jobs_by_wttj(q: str,
+                     latitude: float = 48.85341,
+                     longitude: float = 2.3488,
+                     radius: int = 20):
+    wttj_jobs = wttj_service.search_jobs(q, latitude, longitude, radius)
 
     return {
         "count":len(wttj_jobs),

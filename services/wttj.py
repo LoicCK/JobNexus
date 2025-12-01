@@ -15,7 +15,7 @@ class WelcomeService:
         self.client = SearchClient.create_with_config(config)
         self.index = self.client.init_index(self.index)
 
-    def search_jobs(self, query: str, latitude: float = 48.85341, longitude: float = 2.3488, radius: int = 20) -> List[Job]:
+    def search_jobs(self, query: str, latitude: float, longitude: float, radius: int) -> List[Job]:
         search_params = {
             'filters': 'contract_type:apprenticeship',
             'hitsPerPage': 50,
