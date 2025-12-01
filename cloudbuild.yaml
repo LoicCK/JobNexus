@@ -17,7 +17,7 @@ steps:
       - 'europe-west9'
       - '--allow-unauthenticated'
       - '--set-secrets'
-      - 'FT_CLIENT_ID=france-travail-id:latest,FT_CLIENT_SECRET=france-travail-secret:latest,LBA_API_KEY=la-bonne-alternance-api-key:latest'
+      - 'FT_CLIENT_ID=france-travail-id:latest,FT_CLIENT_SECRET=france-travail-secret:latest,LBA_API_KEY=la-bonne-alternance-api-key:latest,WTTJ_APP_ID=wttj-app-id:latest,WTTJ_API_KEY=wttj-api-key:latest'
 
 images:
   - 'europe-west9-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app'
