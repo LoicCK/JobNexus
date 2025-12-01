@@ -61,8 +61,7 @@ def get_jobs_by_query(q: str = "ingénieur cloud",
                       longitude: float = 2.3522,
                       latitude: float = 48.8566,
                       radius: int = 30,
-                      insee: str = "75056",
-                      romes: str = "M1805"):
+                      insee: str = "75056"):
     jobs = orchestrator_service.find_jobs_by_query(q, longitude, latitude, radius, insee)
 
     return {

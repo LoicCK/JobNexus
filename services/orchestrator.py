@@ -18,5 +18,5 @@ class OrchestratorService:
         codes = [rome.code for rome in romes]
         codes = ",".join(codes)
         jobs = self.lba_service.search_jobs(longitude, latitude, radius, insee, codes)
-        jobs.extend(self.wttj_service.search_jobs(query, longitude, latitude, radius))
+        jobs.extend(self.wttj_service.search_jobs(query, latitude, longitude, radius))
         return jobs
