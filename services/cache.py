@@ -2,7 +2,7 @@ from typing import List
 from google.cloud import firestore
 import hashlib
 from models.job import Job
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 class CacheService:
@@ -16,10 +16,11 @@ class CacheService:
 
     def save_jobs(self, query: str, lat: float, lon: float, radius: int, jobs: List[Job]):
         research_date = datetime.now(timezone.utc)
+        expire_at = research_date + timedelta(days=1)
         cache_key = self._generate_cache_key(query, lat, lon, radius)
         jobs_data = [job.model_dump() for job in jobs]
         document_content = {
-            "date":research_date,
+            "expire_at":expire_at,
             "params":{
                 "query":query,
                 "lat":lat,
@@ -38,9 +39,9 @@ class CacheService:
             return None
         data = doc_snapshot.to_dict()
         current_date = datetime.now(timezone.utc)
-        cached_date = data["date"]
-        age = current_date - cached_date
-        if age.total_seconds() > 86400:
+        cached_date = data["expire_at"]
+        time_since_exp = current_date - cached_date
+        if time_since_exp.total_seconds() > 0:
             print("Expired cache")
             return None
         jobs_dicts = data.get("jobs", [])
