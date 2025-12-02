@@ -207,3 +207,6 @@ marimo/_lsp/
 __marimo__/
 
 .idea/
+
+gcp_credentials.json
+gcp_credentials.json

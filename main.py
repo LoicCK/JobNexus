@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 import os
+
+from services.cache import CacheService
 from services.labonnealternance import LaBonneAlternanceService
 from services.orchestrator import OrchestratorService
 from services.rome import RomeService
@@ -14,8 +16,9 @@ wttj_api_key = os.environ.get("WTTJ_API_KEY")
 rome_service = RomeService(ft_id, ft_secret)
 lba_service = LaBonneAlternanceService(lba_key)
 wttj_service = WelcomeService(wttj_app_id, wttj_api_key)
+cache_service = CacheService()
 
-orchestrator_service = OrchestratorService(lba_service, rome_service, wttj_service)
+orchestrator_service = OrchestratorService(lba_service, rome_service, wttj_service, cache_service)
 
 app = FastAPI(title="JobNexus")
 
