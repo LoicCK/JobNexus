@@ -1,3 +1,4 @@
+from services.apec import ApecService
 from services.cache import CacheService
 from services.labonnealternance import LaBonneAlternanceService
 from services.rome import RomeService
@@ -10,11 +11,13 @@ class OrchestratorService:
                  lba_service: LaBonneAlternanceService,
                  rome_service: RomeService,
                  wttj_service: WelcomeService,
-                 cache_service: CacheService):
+                 cache_service: CacheService,
+                 apec_service: ApecService):
         self.lba_service = lba_service
         self.rome_service = rome_service
         self.wttj_service = wttj_service
         self.cache_service = cache_service
+        self.apec_service = apec_service
 
     def find_jobs_by_query(self, query: str,  longitude: float, latitude: float, radius: int, insee: str) -> List[Job]:
         cached_jobs = self.cache_service.get_jobs(query, latitude, longitude, radius)
@@ -28,5 +31,6 @@ class OrchestratorService:
         codes = ",".join(codes)
         jobs = self.lba_service.search_jobs(longitude, latitude, radius, insee, codes)
         jobs.extend(self.wttj_service.search_jobs(query, latitude, longitude, radius))
+        jobs.extend(self.apec_service.search_jobs(query))
         self.cache_service.save_jobs(query, latitude, longitude, radius, jobs)
         return jobs
