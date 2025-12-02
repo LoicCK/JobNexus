@@ -57,7 +57,8 @@ class LaBonneAlternanceService:
                 city=place.get("city") or place.get("fullAddress"),
                 url=item.get("url", "#"),
                 contract_type="Alternance",
-                target_diploma_level=item.get("target_diploma_level") or  "Niveau d'études non précisé"
+                target_diploma_level=item.get("target_diploma_level") or  "Niveau d'études non précisé",
+                source="LBA"
             )
         except Exception as e:
             print(f"Skipping PE job: {e}")
