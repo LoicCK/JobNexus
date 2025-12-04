@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import os
 
+from services.apec import ApecService
 from services.cache import CacheService
 from services.labonnealternance import LaBonneAlternanceService
 from services.orchestrator import OrchestratorService
@@ -17,8 +18,9 @@ rome_service = RomeService(ft_id, ft_secret)
 lba_service = LaBonneAlternanceService(lba_key)
 wttj_service = WelcomeService(wttj_app_id, wttj_api_key)
 cache_service = CacheService()
+apec_service = ApecService()
 
-orchestrator_service = OrchestratorService(lba_service, rome_service, wttj_service, cache_service)
+orchestrator_service = OrchestratorService(lba_service, rome_service, wttj_service, cache_service, apec_service)
 
 app = FastAPI(title="JobNexus")
 
@@ -82,4 +84,13 @@ def get_jobs_by_wttj(q: str,
     return {
         "count":len(wttj_jobs),
         "results":wttj_jobs
+    }
+
+@app.get("/apec")
+def get_jobs_by_apec(q: str = "Cloud", insee: str = "75056"):
+    apec_jobs = apec_service.search_jobs(q, insee)
+
+    return {
+        "count":len(apec_jobs),
+        "results":apec_jobs
     }
