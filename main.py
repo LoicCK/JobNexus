@@ -87,8 +87,8 @@ def get_jobs_by_wttj(q: str,
     }
 
 @app.get("/apec")
-def get_jobs_by_apec(q: str = "Cloud"):
-    apec_jobs = apec_service.search_jobs(q)
+def get_jobs_by_apec(q: str = "Cloud", insee: str = "75056"):
+    apec_jobs = apec_service.search_jobs(q, insee)
 
     return {
         "count":len(apec_jobs),

@@ -31,6 +31,6 @@ class OrchestratorService:
         codes = ",".join(codes)
         jobs = self.lba_service.search_jobs(longitude, latitude, radius, insee, codes)
         jobs.extend(self.wttj_service.search_jobs(query, latitude, longitude, radius))
-        jobs.extend(self.apec_service.search_jobs(query))
+        jobs.extend(self.apec_service.search_jobs(query, insee))
         self.cache_service.save_jobs(query, latitude, longitude, radius, jobs)
         return jobs
