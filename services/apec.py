@@ -23,15 +23,8 @@ class ApecService:
         self.session.headers.update(headers)
         self.session.get("https://www.apec.fr/")
         self.url = "https://www.apec.fr/cms/webservices/rechercheOffre"
-
-    def search_jobs(self, query: str, insee: str) -> List[Job]:
-        code_dep = insee[:2]
-        search_headers = {
-            "Referer":
-                f"https://www.apec.fr/candidat/recherche-emploi.html/emploi?typesContrat=20053&motsCles={query}&lieux={code_dep}"
-        }
-        payload = {
-            "lieux": [code_dep],
+        self.payload = {
+            "lieux": [],
             "fonctions": [],
             "statutPoste": [],
             "typesContrat": ["20053"],
@@ -47,11 +40,19 @@ class ApecService:
             "pagination": {"range": 50, "startIndex": 0},
             "activeFiltre": True,
             "pointGeolocDeReference": {"distance": 0},
-            "motsCles": query
+            "motsCles": ""
         }
 
+    def search_jobs(self, query: str, insee: str) -> List[Job]:
+        code_dep = insee[:2]
+        search_headers = {
+            "Referer":
+                f"https://www.apec.fr/candidat/recherche-emploi.html/emploi?typesContrat=20053&motsCles={query}&lieux={code_dep}"
+        }
+        self.payload["lieux"] = [code_dep]
+        self.payload["motsCles"] = query
         try:
-            response = self.session.post(self.url, json=payload, headers=search_headers)
+            response = self.session.post(self.url, json=self.payload, headers=search_headers)
             response.raise_for_status()
             data = response.json()
         except Exception as e:
