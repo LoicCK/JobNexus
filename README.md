@@ -23,7 +23,7 @@ JobNexus is a work-study job aggregator built with Python and FastAPI. It consol
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/LoicCK/JobNexus
+   git clone https://github.com/LoicCK/JobNexus.git
    cd jobnexus
    ```
 
