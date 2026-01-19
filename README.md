@@ -1,88 +1,95 @@
 # JobNexus
 
-JobNexus is a work-study job aggregator built with Python and FastAPI. It consolidates job listings from multiple platforms into a single, unified API.
+**JobNexus** is a Serverless apprenticeship aggregator designed to simplify job hunting for students. It consolidates offers from multiple major French platforms into a single, unified REST API.
+
+Built with a **Cloud-First** approach, it leverages **Google Cloud Platform** to ensure scalability and cost-efficiency (Scale-to-Zero).
+
+## Architecture
+
+The application is designed as a **Serverless Microservice**. The orchestration logic handles data fetching, normalization, and caching to reduce latency and external API calls.
+
+```mermaid
+graph TD
+    User((User)) -->|HTTPS| CR[Cloud Run Service]
+    subgraph GCP [Google Cloud Platform]
+        CR -->|FastAPI| Orch[Orchestrator Service]
+        Orch -->|Read/Write| DB[(Firestore Cache)]
+        Orch -->|Fetch Secrets| SM[Secret Manager]
+    end
+    subgraph External [External APIs]
+        Orch --> LBA[La Bonne Alternance]
+        Orch --> WTTJ[Welcome To The Jungle]
+        Orch --> APEC[APEC]
+        Orch --> FT[France Travail / ROME]
+    end
+```
+
+## Tech Stack
+
+| Domain | Technology | Usage |
+|:---|:---|:---|
+| **Core** | ![Python](https://img.shields.io/badge/Python-3.14-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.122-green) | High-performance API & Business Logic |
+| **Compute** | **Google Cloud Run** | Serverless Container Hosting |
+| **Database** | **Google Firestore** | NoSQL Database for caching job results |
+| **DevOps** | **Docker** | Containerization (Multi-stage build) |
+| **CI/CD** | **Cloud Build** | Automated GitOps pipeline |
+| **Security** | **Secret Manager** | Secure management of API Keys at runtime |
+| **Registry** | **Artifact Registry** | Secure Docker image storage |
+
+## CI/CD & Automation
+
+This project follows a **GitOps** methodology. Every push to the `main` branch triggers a fully automated pipeline via **Google Cloud Build** defined in [`cloudbuild.yaml`](./cloudbuild.yaml).
+
+**Pipeline Steps:**
+1.  **Build**: Creates a Docker image based on the `Dockerfile`.
+2.  **Push**: Uploads the artifact to **Google Artifact Registry** (`europe-west9`).
+3.  **Deploy**: Deploys the new revision to **Cloud Run** with the following production configuration:
+    * **Region**: `europe-west9` (Paris)
+    * **Security**: Environment variables are injected dynamically via **GCP Secret Manager** (no hardcoded secrets).
+    * **Access**: Publicly accessible (`--allow-unauthenticated`).
+
+## Performance & FinOps Strategy
+
+As a student project, cost optimization is a priority.
+
+* **Scale-to-Zero**: Hosting on **Cloud Run** ensures that no compute costs are incurred when the API is idle.
+* **Smart Caching**: To reduce latency and avoid hitting external API rate limits, requests are cached in **Firestore**.
+    * *Logic*: The Orchestrator checks Firestore first. If a valid cache entry exists (**TTL: 24h**), it serves it immediately (< 50ms). If not, it fetches live data and updates the cache.
 
 ## Features
 
-- **Multi-source Aggregation**: Aggregates job offers from:
+- **Multi-source Aggregation**: Unifies job offers from:
   - **La Bonne Alternance**
   - **Welcome to the Jungle**
   - **APEC**
-  - **France Travail** (via ROME service for categorization)
-- **Unified Search**: Provides a single endpoint to search across all supported platforms.
-- **Caching**: Utilizes Google Cloud Firestore to cache results and improve performance.
-- **REST API**: Built with FastAPI, offering automatic interactive documentation.
+  - **France Travail** (via ROME service for precise categorization)
+- **Unified Search**: A single endpoint to query all platforms simultaneously.
+- **Developer Experience**: Automatic interactive documentation (Swagger UI).
 
-## Prerequisites
+## Local Development (via Docker)
 
-- **Python** >= 3.14
-- **Poetry**: For dependency management.
-- **Google Cloud Credentials**: Access to a Google Cloud project with Firestore enabled.
+You can run the full stack locally using Docker to replicate the production environment.
 
-## Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/LoicCK/JobNexus.git
-   cd jobnexus
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   poetry install
-   ```
-
-## Configuration
-
-The application relies on several environment variables for authentication with external services. Ensure these are set in your environment before running the application.
-
-| Variable | Description |
-|----------|-------------|
-| `FT_CLIENT_ID` | France Travail Client ID |
-| `FT_CLIENT_SECRET` | France Travail Client Secret |
-| `LBA_API_KEY` | La Bonne Alternance API Key |
-| `WTTJ_APP_ID` | Welcome to the Jungle App ID |
-| `WTTJ_API_KEY` | Welcome to the Jungle API Key |
-
-## Usage
-
-Start the development server using Uvicorn:
+**Prerequisites:**
+- Docker installed
+- A `.env` file with your API keys (see `.env.example`)
 
 ```bash
-poetry run uvicorn main:app --reload
+# 1. Build the Docker image
+docker build -t jobnexus .
+
+# 2. Run the container (injecting environment variables)
+docker run -p 8080:8080 --env-file .env jobnexus
 ```
 
-The API will be available at `http://127.0.0.1:8000`.
+The API will be available at `http://127.0.0.1:8080`.
 
-### API Documentation
+## API Documentation
 
-FastAPI automatically generates interactive API documentation. Once the server is running, you can access it at:
+FastAPI automatically generates interactive API documentation. Once running:
 
-- **Swagger UI:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **ReDoc:** [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
-
-## API Endpoints
-
-- **GET /**: Welcome message and environment status check.
-- **GET /health**: Health check.
-- **GET /search**: **Main endpoint**. Searches for jobs across all configured services.
-  - Query parameters: `q`, `longitude`, `latitude`, `radius`, `insee`.
-- **GET /lba**: Search La Bonne Alternance directly.
-- **GET /wttj**: Search Welcome to the Jungle directly.
-- **GET /apec**: Search APEC directly.
-- **GET /rome**: Search for ROME codes (used for categorization).
-
-## Development
-
-This project uses `black` for code formatting and `ruff` for linting.
-
-```bash
-# Format code
-poetry run black .
-
-# Lint code
-poetry run ruff check .
-```
+- **Swagger UI:** [http://127.0.0.1:8080/docs](http://127.0.0.1:8080/docs)
+- **ReDoc:** [http://127.0.0.1:8080/redoc](http://127.0.0.1:8080/redoc)
 
 ## License
 
