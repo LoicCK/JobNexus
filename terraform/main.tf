@@ -1,14 +1,36 @@
+resource "google_service_account" "run_sa" {
+  account_id = "jobnexus-run-sa"
+  display_name = "Cloud Run identity"
+}
+
+data "google_project" "project" {
+}
+
+resource "google_project_iam_member" "run_secret_access" {
+  member  = "serviceAccount:${google_service_account.run_sa.email}"
+  project = var.project_id
+  role    = "roles/secretmanager.secretAccessor"
+}
+
+resource "google_cloud_run_v2_service_iam_member" "gateway_invoker" {
+  project = var.project_id
+  location = var.region
+  member   = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+  name   = google_cloud_run_v2_service.jobnexus_service.name
+  role   = "roles/run.invoker"
+}
+
 resource "google_artifact_registry_repository" "jobnexus_repo" {
   provider      = google
   project       = var.project_id
   location      = var.region
   repository_id = "jobnexus-repo"
   format        = "DOCKER"
-  description   = "Repository Docker pour JobNexus"
+  description   = "Repository Docker for JobNexus"
 
   cleanup_policies {
     action = "KEEP"
-    id     = "conservation des plus récents"
+    id     = "Archives of previous builds"
     most_recent_versions {
       keep_count = 2
     }
@@ -20,11 +42,11 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
   project  = var.project_id
   location = var.region
   name     = "jobnexus-service"
-  ingress  = "INGRESS_TRAFFIC_ALL"
+  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
 
   template {
     timeout                          = "300s"
-    service_account                  = "237957007732-compute@developer.gserviceaccount.com"
+    service_account                  = google_service_account.run_sa.email
     max_instance_request_concurrency = 80
     
     scaling {
@@ -117,6 +139,10 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
       template[0].containers[0].image 
     ]
   }
+
+  depends_on = [
+    google_project_iam_member.run_secret_access
+  ]
 }
 
 resource "google_secret_manager_secret" "ft_client_id" {
