@@ -13,8 +13,8 @@
   "x-google-api-management": {
     "backends": {
       "jobnexus_backend": {
-        "address": "https://jobnexus-service-237957007732.europe-west9.run.app",
-        "jwt_audience": "https://jobnexus-service-237957007732.europe-west9.run.app",
+        "address": "${cloud_run_url}",
+        "jwt_audience": "${cloud_run_url}",
         "deadline": 30.0,
         "pathTranslation": "APPEND_PATH_TO_ADDRESS",
         "protocol": "http/1.1"

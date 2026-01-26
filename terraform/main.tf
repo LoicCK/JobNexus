@@ -3,6 +3,11 @@ resource "google_service_account" "run_sa" {
   display_name = "Cloud Run identity"
 }
 
+resource "google_service_account" "gateway_sa" {
+  account_id   = "jobnexus-gateway-sa"
+  display_name = "API Gateway Service Account"
+}
+
 data "google_project" "project" {
 }
 
@@ -15,9 +20,9 @@ resource "google_project_iam_member" "run_secret_access" {
 resource "google_cloud_run_v2_service_iam_member" "gateway_invoker" {
   project = var.project_id
   location = var.region
-  member   = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
-  name   = google_cloud_run_v2_service.jobnexus_service.name
+  member = "serviceAccount:${google_service_account.gateway_sa.email}"
   role   = "roles/run.invoker"
+  name   = google_cloud_run_v2_service.jobnexus_service.name
 }
 
 resource "google_artifact_registry_repository" "jobnexus_repo" {
@@ -42,7 +47,7 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
   project  = var.project_id
   location = var.region
   name     = "jobnexus-service"
-  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+  ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
     timeout                          = "300s"
@@ -196,14 +201,26 @@ resource "google_api_gateway_api_config" "jobnexus_config" {
   provider      = google-beta
   project       = var.project_id
   api           = google_api_gateway_api.jobnexus_api.api_id
-  api_config_id = "jobnexus-conf-v3" 
+  api_config_id_prefix = "jobnexus-conf-"
   display_name  = "jobnexus-conf-v3"
+
+  gateway_config {
+    backend_config {
+      google_service_account = google_service_account.gateway_sa.email
+    }
+  }
 
   openapi_documents {
     document {
       path     = "openapi-jobnexus.json"
-      contents = filebase64("openapi-jobnexus.json")
+      contents = base64encode(templatefile("openapi-jobnexus.json", {
+        cloud_run_url = google_cloud_run_v2_service.jobnexus_service.uri
+      }))
     }
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -212,6 +229,6 @@ resource "google_api_gateway_gateway" "jobnexus_gateway" {
   project      = var.project_id
   api_config   = google_api_gateway_api_config.jobnexus_config.id
   gateway_id   = "jobnexus-gateway"
-  region       = "europe-west1"
+  region       = var.region
   display_name = "jobnexus-gateway"
 }

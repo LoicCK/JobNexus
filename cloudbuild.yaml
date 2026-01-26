@@ -1,9 +1,9 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'europe-west9-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app', '.']
+    args: ['build', '-t', 'europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app', '.']
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'europe-west9-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app']
+    args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app']
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
@@ -12,14 +12,12 @@ steps:
       - 'deploy'
       - 'jobnexus-service'
       - '--image'
-      - 'europe-west9-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app'
       - '--region'
-      - 'europe-west9'
-      - '--set-secrets'
-      - 'FT_CLIENT_ID=france-travail-id:latest,FT_CLIENT_SECRET=france-travail-secret:latest,LBA_API_KEY=la-bonne-alternance-api-key:latest,WTTJ_APP_ID=wttj-app-id:latest,WTTJ_API_KEY=wttj-api-key:latest'
+      - 'europe-west1'
 
 images:
-  - 'europe-west9-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app'
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app'
 
 options:
   logging: CLOUD_LOGGING_ONLY
