@@ -1,9 +1,11 @@
+# The Google Cloud Project ID where resources will be deployed
 variable "project_id" {
   description = "Project ID"
   type        = string
-  default = "jobnexus-479520"
+  default     = "jobnexus-479520"
 }
 
+# The default GCP region for resources
 variable "region" {
   description = "Default region"
   type        = string

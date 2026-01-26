@@ -1,30 +1,44 @@
+# ------------------------------------------------------------------------------
+# Service Accounts & IAM Permissions
+# ------------------------------------------------------------------------------
+
+# Service Account for the Cloud Run application
 resource "google_service_account" "run_sa" {
-  account_id = "jobnexus-run-sa"
+  account_id   = "jobnexus-run-sa"
   display_name = "Cloud Run identity"
 }
 
+# Service Account for the API Gateway
 resource "google_service_account" "gateway_sa" {
   account_id   = "jobnexus-gateway-sa"
   display_name = "API Gateway Service Account"
 }
 
+# Data source to access project details
 data "google_project" "project" {
 }
 
+# Grant the Cloud Run Service Account access to Secret Manager
 resource "google_project_iam_member" "run_secret_access" {
   member  = "serviceAccount:${google_service_account.run_sa.email}"
   project = var.project_id
   role    = "roles/secretmanager.secretAccessor"
 }
 
+# Allow the API Gateway Service Account to invoke the Cloud Run service
 resource "google_cloud_run_v2_service_iam_member" "gateway_invoker" {
-  project = var.project_id
+  project  = var.project_id
   location = var.region
-  member = "serviceAccount:${google_service_account.gateway_sa.email}"
-  role   = "roles/run.invoker"
-  name   = google_cloud_run_v2_service.jobnexus_service.name
+  member   = "serviceAccount:${google_service_account.gateway_sa.email}"
+  role     = "roles/run.invoker"
+  name     = google_cloud_run_v2_service.jobnexus_service.name
 }
 
+# ------------------------------------------------------------------------------
+# Artifact Registry
+# ------------------------------------------------------------------------------
+
+# Docker repository to store application images
 resource "google_artifact_registry_repository" "jobnexus_repo" {
   provider      = google
   project       = var.project_id
@@ -33,6 +47,7 @@ resource "google_artifact_registry_repository" "jobnexus_repo" {
   format        = "DOCKER"
   description   = "Repository Docker for JobNexus"
 
+  # Keep only the 2 most recent versions to save storage
   cleanup_policies {
     action = "KEEP"
     id     = "Archives of previous builds"
@@ -42,18 +57,26 @@ resource "google_artifact_registry_repository" "jobnexus_repo" {
   }
 }
 
+# ------------------------------------------------------------------------------
+# Cloud Run Service
+# ------------------------------------------------------------------------------
+
+# Main application deployment on Cloud Run
 resource "google_cloud_run_v2_service" "jobnexus_service" {
   provider = google
   project  = var.project_id
   location = var.region
   name     = "jobnexus-service"
+
+  # Allow traffic from everywhere (public ingress)
   ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
     timeout                          = "300s"
     service_account                  = google_service_account.run_sa.email
     max_instance_request_concurrency = 80
-    
+
+    # Autoscaling configuration
     scaling {
       max_instance_count = 20
       min_instance_count = 0
@@ -61,7 +84,7 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
 
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project_id}/jobnexus-repo/jobnexus-app"
-      
+
       resources {
         limits = {
           cpu    = "1000m"
@@ -74,11 +97,13 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
         container_port = 8080
       }
 
+      # Environment variables
       env {
         name  = "FORCE_UPDATE"
         value = "1"
       }
 
+      # Secrets injection as environment variables
       env {
         name = "FT_CLIENT_ID"
         value_source {
@@ -124,7 +149,8 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
           }
         }
       }
-      
+
+      # Startup probe to check if the app is ready
       startup_probe {
         initial_delay_seconds = 0
         timeout_seconds       = 240
@@ -137,11 +163,12 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
     }
   }
 
+  # Ignore changes to specific fields to prevent accidental overwrites during updates
   lifecycle {
     ignore_changes = [
       client,
       client_version,
-      template[0].containers[0].image 
+      template[0].containers[0].image
     ]
   }
 
@@ -150,6 +177,11 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
   ]
 }
 
+# ------------------------------------------------------------------------------
+# Secret Manager Secrets
+# ------------------------------------------------------------------------------
+
+# Secrets for France Travail API
 resource "google_secret_manager_secret" "ft_client_id" {
   project   = var.project_id
   secret_id = "france-travail-id"
@@ -166,6 +198,7 @@ resource "google_secret_manager_secret" "ft_client_secret" {
   }
 }
 
+# Secret for La Bonne Alternance API
 resource "google_secret_manager_secret" "lba_api_key" {
   project   = var.project_id
   secret_id = "la-bonne-alternance-api-key"
@@ -174,6 +207,7 @@ resource "google_secret_manager_secret" "lba_api_key" {
   }
 }
 
+# Secrets for Welcome To The Jungle API
 resource "google_secret_manager_secret" "wttj_api_key" {
   project   = var.project_id
   secret_id = "wttj-api-key"
@@ -190,6 +224,11 @@ resource "google_secret_manager_secret" "wttj_app_id" {
   }
 }
 
+# ------------------------------------------------------------------------------
+# API Gateway
+# ------------------------------------------------------------------------------
+
+# Define the API Gateway API resource
 resource "google_api_gateway_api" "jobnexus_api" {
   provider     = google-beta
   project      = var.project_id
@@ -197,6 +236,7 @@ resource "google_api_gateway_api" "jobnexus_api" {
   display_name = "jobnexus-api"
 }
 
+# Configure the API Gateway with the OpenAPI spec
 resource "google_api_gateway_api_config" "jobnexus_config" {
   provider      = google-beta
   project       = var.project_id
@@ -210,6 +250,7 @@ resource "google_api_gateway_api_config" "jobnexus_config" {
     }
   }
 
+  # Load OpenAPI spec and inject Cloud Run URL
   openapi_documents {
     document {
       path     = "openapi-jobnexus.json"
@@ -224,6 +265,7 @@ resource "google_api_gateway_api_config" "jobnexus_config" {
   }
 }
 
+# Deploy the API Gateway
 resource "google_api_gateway_gateway" "jobnexus_gateway" {
   provider     = google-beta
   project      = var.project_id
