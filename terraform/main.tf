@@ -236,13 +236,20 @@ resource "google_api_gateway_api" "jobnexus_api" {
   display_name = "jobnexus-api"
 }
 
+
+locals {
+  openapi_content = templatefile("openapi-jobnexus.json", {
+    cloud_run_url = google_cloud_run_v2_service.jobnexus_service.uri
+  })
+}
+
 # Configure the API Gateway with the OpenAPI spec
 resource "google_api_gateway_api_config" "jobnexus_config" {
   provider      = google-beta
   project       = var.project_id
   api           = google_api_gateway_api.jobnexus_api.api_id
   api_config_id_prefix = "jobnexus-conf-"
-  display_name  = "jobnexus-conf-v3"
+  display_name  = "jobnexus-conf-${substr(md5(local.openapi_content), 0, 7)}"
 
   gateway_config {
     backend_config {
@@ -254,9 +261,7 @@ resource "google_api_gateway_api_config" "jobnexus_config" {
   openapi_documents {
     document {
       path     = "openapi-jobnexus.json"
-      contents = base64encode(templatefile("openapi-jobnexus.json", {
-        cloud_run_url = google_cloud_run_v2_service.jobnexus_service.uri
-      }))
+      contents = base64encode(local.openapi_content)
     }
   }
 
