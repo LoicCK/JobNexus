@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 from datetime import datetime, timezone
 from typing import List
 
@@ -11,7 +12,9 @@ from models.job import Job
 class DataService:
     def __init__(self):
         self.client = bigquery.Client()
-        self.table_id = "jobnexus-479520.jobnexus_job_data.jobnexus_job_table"
+        self.table_id = os.getenv("BIGQUERY_TABLE_ID")
+        if not self.table_id:
+            raise ValueError("Environment variable BIGQUERY_TABLE_ID is not set")
 
     def generate_job_hash(self, job: Job) -> str:
         raw_string = f"{job.title}{job.company}{job.url}".lower()

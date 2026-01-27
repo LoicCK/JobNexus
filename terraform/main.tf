@@ -150,6 +150,11 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
         }
       }
 
+      env {
+        name  = "BIGQUERY_TABLE_ID"
+        value = "${var.project_id}.${google_bigquery_dataset.job_data.dataset_id}.${google_bigquery_table.job_table.table_id}"
+      }
+
       # Startup probe to check if the app is ready
       startup_probe {
         initial_delay_seconds = 0

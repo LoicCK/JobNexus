@@ -41,6 +41,12 @@ class OrchestratorService:
         jobs = self.lba_service.search_jobs(longitude, latitude, radius, insee, codes)
         jobs.extend(self.wttj_service.search_jobs(query, latitude, longitude, radius))
         jobs.extend(self.apec_service.search_jobs(query, insee))
-        self.cache_service.save_jobs(query, latitude, longitude, radius, jobs)
-        self.data_service.save_jobs_data(jobs)
+        try:
+            self.cache_service.save_jobs(query, latitude, longitude, radius, jobs)
+        except Exception as e:
+            print(f"Failed to cache jobs to FireStore: {e}")
+        try:
+            self.data_service.save_jobs_data(jobs)
+        except Exception as e:
+            print(f"Failed to save jobs to BigQuery: {e}")
         return jobs

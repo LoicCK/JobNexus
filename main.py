@@ -24,7 +24,7 @@ apec_service = ApecService()
 data_service = DataService()
 
 orchestrator_service = OrchestratorService(
-    lba_service, rome_service, wttj_service, cache_service, apec_service
+    lba_service, rome_service, wttj_service, cache_service, apec_service, data_service
 )
 
 app = FastAPI(title="JobNexus")
