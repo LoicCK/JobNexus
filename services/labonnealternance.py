@@ -1,5 +1,7 @@
+from typing import Any, Dict, List, Optional
+
 import requests
-from typing import List, Optional, Dict, Any
+
 from models.job import Job
 
 
@@ -8,16 +10,18 @@ class LaBonneAlternanceService:
         self.api_key = api_key
         self.url = "https://labonnealternance.apprentissage.beta.gouv.fr/api/v1/jobs"
 
-    def search_jobs(self, longitude: float, latitude: float, radius: int, insee: str, romes: str) -> List[Job]:
+    def search_jobs(
+        self, longitude: float, latitude: float, radius: int, insee: str, romes: str
+    ) -> List[Job]:
 
         params = {
             "longitude": longitude,
             "latitude": latitude,
-            "insee":insee,
+            "insee": insee,
             "radius": radius,
             "romes": romes,
             "caller": "jobnexus",
-            "sources": "offres,matcha,lba"
+            "sources": "offres,matcha,lba",
         }
 
         headers = {"Accept": "application/json"}
@@ -57,8 +61,9 @@ class LaBonneAlternanceService:
                 city=place.get("city") or place.get("fullAddress"),
                 url=item.get("url", "#"),
                 contract_type="Alternance",
-                target_diploma_level=item.get("target_diploma_level") or  "Niveau d'études non précisé",
-                source="LBA"
+                target_diploma_level=item.get("target_diploma_level")
+                or "Niveau d'études non précisé",
+                source="LBA",
             )
         except Exception as e:
             print(f"Skipping PE job: {e}")
@@ -88,7 +93,7 @@ class LaBonneAlternanceService:
                 url=url,
                 contract_type=job_details.get("contractType", "Apprentissage"),
                 target_diploma_level=item.get("target_diploma_level"),
-                source="LBA"
+                source="LBA",
             )
         except Exception as e:
             print(f"Skipping Matcha job: {e}")
