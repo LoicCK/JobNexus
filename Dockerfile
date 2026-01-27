@@ -23,4 +23,7 @@ RUN poetry install --without dev --no-root
 
 COPY . .
 
+RUN adduser --disabled-password --gecos '' myuser
+USER myuser
+
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}"]
