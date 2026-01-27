@@ -279,3 +279,33 @@ resource "google_api_gateway_gateway" "jobnexus_gateway" {
   region       = var.region
   display_name = "jobnexus-gateway"
 }
+
+# ------------------------------------------------------------------------------
+# Firestore Cache
+# ------------------------------------------------------------------------------
+
+resource "google_project_service" "firestore" {
+  project            = var.project_id
+  service            = "firestore.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_firestore_database" "database" {
+  project     = var.project_id
+  name        = "(default)"
+  location_id = var.region
+  type        = "FIRESTORE_NATIVE"
+
+  depends_on = [google_project_service.firestore]
+}
+
+resource "google_firestore_field" "job_searches_ttl" {
+  project    = var.project_id
+  database   = google_firestore_database.database.name
+  collection = "job_searches"
+  field      = "expire_at"
+
+  ttl_config {}
+
+  depends_on = [google_firestore_database.database]
+}
