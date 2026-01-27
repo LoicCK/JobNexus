@@ -11,7 +11,7 @@ class LaBonneAlternanceService:
         self.url = "https://labonnealternance.apprentissage.beta.gouv.fr/api/v1/jobs"
 
     def search_jobs(
-        self, longitude: float, latitude: float, radius: int, insee: str, romes: str
+        self, latitude: float, longitude: float, radius: int, insee: str, romes: str
     ) -> List[Job]:
 
         params = {

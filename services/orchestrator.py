@@ -38,9 +38,23 @@ class OrchestratorService:
             return self.wttj_service.search_jobs(query, longitude, latitude, radius)
         codes = [rome.code for rome in romes]
         codes = ",".join(codes)
-        jobs = self.lba_service.search_jobs(longitude, latitude, radius, insee, codes)
-        jobs.extend(self.wttj_service.search_jobs(query, latitude, longitude, radius))
-        jobs.extend(self.apec_service.search_jobs(query, insee))
+        jobs = []
+        try:
+            jobs.extend(
+                self.lba_service.search_jobs(latitude, longitude, radius, insee, codes)
+            )
+        except Exception as e:
+            print(f"Failed to get jobs on LBA: {e}")
+        try:
+            jobs.extend(
+                self.wttj_service.search_jobs(query, latitude, longitude, radius)
+            )
+        except Exception as e:
+            print(f"Failed to get jobs on WTTJ: {e}")
+        try:
+            jobs.extend(self.apec_service.search_jobs(query, insee))
+        except Exception as e:
+            print(f"Failed to get jobs on APEC: {e}")
         try:
             self.cache_service.save_jobs(query, latitude, longitude, radius, jobs)
         except Exception as e:
