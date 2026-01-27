@@ -150,6 +150,11 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
         }
       }
 
+      env {
+        name  = "BIGQUERY_TABLE_ID"
+        value = "${var.project_id}.${google_bigquery_dataset.job_data.dataset_id}.${google_bigquery_table.job_table.table_id}"
+      }
+
       # Startup probe to check if the app is ready
       startup_probe {
         initial_delay_seconds = 0
@@ -308,4 +313,94 @@ resource "google_firestore_field" "job_searches_ttl" {
   ttl_config {}
 
   depends_on = [google_firestore_database.database]
+}
+
+# ------------------------------------------------------------------------------
+# BigQuery Database
+# ------------------------------------------------------------------------------
+
+resource "google_bigquery_dataset" "job_data" {
+  dataset_id                  = "jobnexus_job_data"
+  friendly_name               = "JobNexus Data"
+  description                 = "Jobs history for market analysis"
+  location                    = var.region
+  delete_contents_on_destroy = true
+
+  labels = {
+    env     = "production"
+    project = "jobnexus"
+  }
+}
+resource "google_bigquery_dataset_iam_member" "cloud_run_bq_access" {
+  dataset_id = google_bigquery_dataset.job_data.dataset_id
+  role       = "roles/bigquery.dataEditor"
+  member     = "serviceAccount:${google_service_account.run_sa.email}"
+}
+
+resource "google_bigquery_table" "job_table" {
+  dataset_id = google_bigquery_dataset.job_data.dataset_id
+  table_id   = "jobnexus_job_table"
+
+  time_partitioning {
+    type = "DAY"
+  }
+
+    schema = <<EOF
+[
+  {
+    "name": "job_hash",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Unique hash of the job offer for deduplication"
+  },
+  {
+    "name": "title",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Title of the job offer"
+  },
+  {
+    "name": "company",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Name of the company"
+  },
+  {
+    "name": "city",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "City in which the job offer is located"
+  },
+  {
+    "name": "url",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "URL to access the job offer"
+  },
+  {
+    "name": "contract_type",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Type of the contract"
+  },
+  {
+    "name": "target_diploma_level",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The target diploma level of the job offer"
+  },
+  {
+    "name": "source",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Job offer source"
+  },
+  {
+    "name": "scraped_at",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": "Timestamp at which the job offer was scraped"
+  }
+]
+EOF
 }

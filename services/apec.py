@@ -1,16 +1,17 @@
 from typing import List
 
 import requests
-from requests import session
 
 from models.job import Job
+
 
 class ApecService:
     def __init__(self):
         self.session = requests.session()
         headers = {
             "Host": "www.apec.fr",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) "
+            "Gecko/20100101 Firefox/145.0",
             "Accept": "application/json, text/plain, */*",
             "Accept-Language": "fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3",
             "Content-Type": "application/json",
@@ -18,7 +19,7 @@ class ApecService:
             "Connection": "keep-alive",
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin"
+            "Sec-Fetch-Site": "same-origin",
         }
         self.session.headers.update(headers)
         self.session.get("https://www.apec.fr/")
@@ -40,19 +41,20 @@ class ApecService:
             "pagination": {"range": 50, "startIndex": 0},
             "activeFiltre": True,
             "pointGeolocDeReference": {"distance": 0},
-            "motsCles": ""
+            "motsCles": "",
         }
 
     def search_jobs(self, query: str, insee: str) -> List[Job]:
         code_dep = insee[:2]
         search_headers = {
-            "Referer":
-                f"https://www.apec.fr/candidat/recherche-emploi.html/emploi?typesContrat=20053&motsCles={query}&lieux={code_dep}"
+            "Referer": f"https://www.apec.fr/candidat/recherche-emploi.html/emploi?typesContrat=20053&motsCles={query}&lieux={code_dep}"
         }
         self.payload["lieux"] = [code_dep]
         self.payload["motsCles"] = query
         try:
-            response = self.session.post(self.url, json=self.payload, headers=search_headers)
+            response = self.session.post(
+                self.url, json=self.payload, headers=search_headers
+            )
             response.raise_for_status()
             data = response.json()
         except Exception as e:
@@ -62,12 +64,12 @@ class ApecService:
         jobs = []
         for result in resultats:
             job = Job(
-                title=result['intitule'],
-                company=result['nomCommercial'],
-                city=result['lieuTexte'],
+                title=result["intitule"],
+                company=result["nomCommercial"],
+                city=result["lieuTexte"],
                 url=f"https://www.apec.fr/candidat/recherche-emploi.html/emploi/detail-offre/{result['numeroOffre']}",
                 target_diploma_level="Inconnu",
-                source="APEC"
+                source="APEC",
             )
             jobs.append(job)
         return jobs

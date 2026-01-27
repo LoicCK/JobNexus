@@ -5,6 +5,8 @@ LABEL authors="LoicCK"
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
+ENV BIGQUERY_TABLE_ID=""
+
 WORKDIR /usr/src/app
 
 RUN apt-get update \
