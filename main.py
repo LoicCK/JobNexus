@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI
+from fastapi import BackgroundTasks, FastAPI
 
 from services.apec import ApecService
 from services.cache import CacheService
@@ -68,6 +68,7 @@ def get_rome_codes(q: str = "ingénieur cloud"):
 
 @app.get("/search")
 def get_jobs_by_query(
+    background_tasks: BackgroundTasks,
     q: str = "ingénieur cloud",
     longitude: float = 2.3522,
     latitude: float = 48.8566,
@@ -75,7 +76,7 @@ def get_jobs_by_query(
     insee: str = "75056",
 ):
     jobs = orchestrator_service.find_jobs_by_query(
-        q, longitude, latitude, radius, insee
+        q, longitude, latitude, radius, insee, background_tasks
     )
 
     return {"count": len(jobs), "results": jobs}
