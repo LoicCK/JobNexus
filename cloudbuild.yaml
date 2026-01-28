@@ -4,6 +4,10 @@ steps:
     args: ['-c', 'docker pull europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app || exit 0']
 
   - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker pull europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-frontend || exit 0']
+
+  - name: 'gcr.io/cloud-builders/docker'
     dir: 'backend'
     args:
       - 'build'
@@ -32,6 +36,8 @@ steps:
     args:
       - 'build'
       - '-t'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-frontend'
+      - '--cache-from'
       - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-frontend'
       - '.'
 
