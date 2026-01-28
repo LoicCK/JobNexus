@@ -39,7 +39,7 @@ COPY --from=builder /opt/venv /opt/venv
 RUN adduser --disabled-password --gecos '' myuser
 
 # we copy the file as the user
-COPY --chown=myuser:myuser . .
+COPY --chown=myuser:myuser .. .
 
 USER myuser
 

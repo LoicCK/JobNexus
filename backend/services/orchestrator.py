@@ -1,15 +1,14 @@
 import logging
 from typing import List
 
+from backend.models.job import Job
+from backend.services.apec import ApecService
+from backend.services.cache import CacheService
+from backend.services.data import DataService
+from backend.services.labonnealternance import LaBonneAlternanceService
+from backend.services.rome import RomeService
+from backend.services.wttj import WelcomeService
 from fastapi import BackgroundTasks
-
-from models.job import Job
-from services.apec import ApecService
-from services.cache import CacheService
-from services.data import DataService
-from services.labonnealternance import LaBonneAlternanceService
-from services.rome import RomeService
-from services.wttj import WelcomeService
 
 
 class OrchestratorService:

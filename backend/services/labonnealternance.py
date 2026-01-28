@@ -1,8 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 import requests
-
-from models.job import Job
+from backend.models.job import Job
 
 
 class LaBonneAlternanceService:
