@@ -14,6 +14,12 @@ resource "google_service_account" "gateway_sa" {
   display_name = "API Gateway Service Account"
 }
 
+# Service Account for the Cloud Scheduler
+resource "google_service_account" "scheduler_sa" {
+  account_id = "jobnexus-scheduler-sa"
+  display_name = "Cloud Scheduler Service Account"
+}
+
 # Data source to access project details
 data "google_project" "project" {
 }
@@ -32,6 +38,14 @@ resource "google_cloud_run_v2_service_iam_member" "gateway_invoker" {
   member   = "serviceAccount:${google_service_account.gateway_sa.email}"
   role     = "roles/run.invoker"
   name     = google_cloud_run_v2_service.jobnexus_service.name
+}
+
+resource "google_cloud_run_v2_service_iam_member" "job_invoker" {
+  project  = var.project_id
+  location = var.region
+  member = "serviceAccount:${google_service_account.scheduler_sa.email}"
+  name   = google_cloud_run_v2_service.jobnexus_service.name
+  role   = "roles/run.invoker"
 }
 
 # ------------------------------------------------------------------------------
@@ -403,4 +417,29 @@ resource "google_bigquery_table" "job_table" {
   }
 ]
 EOF
+}
+
+# ------------------------------------------------------------------------------
+# Cloud Scheduler
+# ------------------------------------------------------------------------------
+
+resource "google_cloud_scheduler_job" "data_job" {
+  for_each = var.jobs
+  name = "jobnexus-search-${lower(each.value)}"
+  description = "A job to gather new offers every day"
+  schedule = "0 6 * * *"
+  time_zone = "Europe/Paris"
+  attempt_deadline = "320s"
+
+  retry_config {
+    retry_count = 2
+  }
+
+  http_target {
+    http_method = "GET"
+    uri = "${google_cloud_run_v2_service.jobnexus_service.uri}/search?q=${each.value}"
+    oidc_token {
+      service_account_email = google_service_account.scheduler_sa.email
+    }
+  }
 }
