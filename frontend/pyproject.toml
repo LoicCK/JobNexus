@@ -6,7 +6,7 @@ authors = [
     {name = "LoicCK",email = "loic.chauveau.kson@proton.me"}
 ]
 readme = "README.md"
-requires-python = "^3.10"
+requires-python = ">=3.14"
 dependencies = [
     "streamlit (>=1.53.1,<2.0.0)",
     "pandas (<3.0.0)",

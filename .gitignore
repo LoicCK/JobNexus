@@ -217,3 +217,5 @@ backend/gcp_credentials.json
 *.tfstate.backup
 .terraform.lock.hcl
 generated.tf
+/frontend/gcp_credentials.json
+/frontend/.env
