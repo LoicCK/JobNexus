@@ -443,3 +443,63 @@ resource "google_cloud_scheduler_job" "data_job" {
     }
   }
 }
+
+# ------------------------------------------------------------------------------
+# Cloud Run Frontend Service
+# ------------------------------------------------------------------------------
+
+resource "google_cloud_run_v2_service" "jobnexus_frontend" {
+  provider = google
+  project  = var.project_id
+  location = var.region
+  name     = "jobnexus-frontend"
+
+  ingress = "INGRESS_TRAFFIC_ALL"
+
+  template {
+    timeout = "300s"
+    service_account = google_service_account.run_sa.email
+
+    scaling {
+      max_instance_count = 10
+      min_instance_count = 0
+    }
+
+    containers {
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/jobnexus-repo/jobnexus-frontend"
+
+      resources {
+        limits = {
+          cpu    = "1000m"
+          memory = "512Mi"
+        }
+        startup_cpu_boost = true
+      }
+
+      ports {
+        container_port = 8080
+      }
+
+      env {
+        name  = "BIGQUERY_PROJECT"
+        value = var.project_id
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      client,
+      client_version,
+      template[0].containers[0].image
+    ]
+  }
+}
+
+resource "google_cloud_run_v2_service_iam_member" "public_access" {
+  project  = var.project_id
+  location = var.region
+  name     = google_cloud_run_v2_service.jobnexus_frontend.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}

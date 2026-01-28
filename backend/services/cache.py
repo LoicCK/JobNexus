@@ -2,9 +2,8 @@ import hashlib
 from datetime import datetime, timedelta, timezone
 from typing import List
 
+from backend.models.job import Job
 from google.cloud import firestore
-
-from models.job import Job
 
 
 class CacheService:

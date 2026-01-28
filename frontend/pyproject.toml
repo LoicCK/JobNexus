@@ -1,0 +1,22 @@
+[project]
+name = "jobnexus-frontend"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "LoicCK",email = "loic.chauveau.kson@proton.me"}
+]
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "streamlit (>=1.53.1,<2.0.0)",
+    "pandas (<3.0.0)",
+    "google-cloud-bigquery (>=3.40.0,<4.0.0)",
+    "db-dtypes (>=1.5.0,<2.0.0)",
+    "plotly (>=6.5.2,<7.0.0)",
+    "google-cloud-bigquery-storage (>=2.36.0,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
