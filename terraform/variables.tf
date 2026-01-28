@@ -19,10 +19,10 @@ variable "jobs" {
     "DevOps",
     "DevSecOps",
     "SRE",
-    "Ingénieur Cloud",
-    "Ingénieur Système",
-    "Ingénieur Réseaux",
+    "Ingenieur-Cloud",
+    "Ingenieur-Systeme",
+    "Ingenieur-Reseaux",
     "Cybersecurity",
-    "Cloud Computing"
+    "Cloud-Computing"
   ]
 }
