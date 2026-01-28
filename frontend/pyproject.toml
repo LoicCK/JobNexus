@@ -12,7 +12,8 @@ dependencies = [
     "pandas (<3.0.0)",
     "google-cloud-bigquery (>=3.40.0,<4.0.0)",
     "db-dtypes (>=1.5.0,<2.0.0)",
-    "plotly (>=6.5.2,<7.0.0)"
+    "plotly (>=6.5.2,<7.0.0)",
+    "google-cloud-bigquery-storage (>=2.36.0,<3.0.0)"
 ]
 
 
