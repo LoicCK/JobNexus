@@ -11,3 +11,9 @@ variable "region" {
   type        = string
   default     = "europe-west1"
 }
+
+variable "jobs" {
+  description = "The jobs to track daily"
+  type = set(string)
+  default = ["DevOps","Cloud"]
+}
