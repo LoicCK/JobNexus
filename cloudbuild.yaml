@@ -27,8 +27,32 @@ steps:
       - '--region'
       - 'europe-west1'
 
+  - name: 'gcr.io/cloud-builders/docker'
+    dir: 'frontend'
+    args:
+      - 'build'
+      - '-t'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-frontend'
+      - '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-frontend']
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'jobnexus-frontend'
+      - '--image'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-frontend'
+      - '--region'
+      - 'europe-west1'
+      - '--allow-unauthenticated'
+
 images:
   - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-app'
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jobnexus-repo/jobnexus-frontend'
 
 options:
   logging: CLOUD_LOGGING_ONLY
