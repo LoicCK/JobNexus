@@ -14,6 +14,15 @@ variable "region" {
 
 variable "jobs" {
   description = "The jobs to track daily"
-  type = set(string)
-  default = ["DevOps","Cloud","DevSecOps","SRE"]
+  type        = set(string)
+  default     = [
+    "DevOps",
+    "DevSecOps",
+    "SRE",
+    "Ingénieur Cloud",
+    "Ingénieur Système",
+    "Ingénieur Réseaux",
+    "Cybersecurity",
+    "Cloud Computing"
+  ]
 }
