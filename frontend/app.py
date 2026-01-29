@@ -4,6 +4,8 @@ from datetime import date
 import pandas as pd
 import requests
 import streamlit as st
+from google.auth.transport.requests import Request as GoogleRequest
+from google.oauth2 import id_token
 
 PAGE_TITLE = "JobNexus"
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
@@ -25,8 +27,17 @@ st.set_page_config(page_title=PAGE_TITLE, layout="wide")
 @st.cache_data(ttl=3600)
 def load_data(category: str) -> pd.DataFrame:
     try:
+        headers = {}
+
+        if "localhost" not in BACKEND_URL:
+            auth_req = GoogleRequest()
+            token = id_token.fetch_id_token(auth_req, BACKEND_URL)
+            headers["Authorization"] = f"Bearer {token}"
+
         response = requests.get(
-            f"{BACKEND_URL}/opportunities", params={"q": category, "limit": 1000}
+            f"{BACKEND_URL}/opportunities",
+            params={"q": category, "limit": 1000},
+            headers=headers,
         )
         response.raise_for_status()
         data = response.json()

@@ -91,6 +91,14 @@ resource "google_service_account_iam_member" "build_act_as_run_sa" {
   member             = "serviceAccount:${google_service_account.build_sa.email}"
 }
 
+resource "google_cloud_run_v2_service_iam_member" "frontend_backend_access" {
+  project  = var.project_id
+  location = var.region
+  name     = google_cloud_run_v2_service.jobnexus_service.name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.run_sa.email}"
+}
+
 # ------------------------------------------------------------------------------
 # Artifact Registry
 # ------------------------------------------------------------------------------
