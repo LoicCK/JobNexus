@@ -50,6 +50,7 @@ class DataService:
         MERGE `{self.table_id}` T
         USING (
           SELECT
+            JSON_VALUE(item, '$.search_query') as search_query,
             JSON_VALUE(item, '$.job_hash') as job_hash,
             JSON_VALUE(item, '$.title') as title,
             JSON_VALUE(item, '$.company') as company,
@@ -81,3 +82,44 @@ class DataService:
 
         query_job = self.client.query(query, job_config=job_config)
         query_job.result()
+
+    def get_opportunities(
+        self, search_query: str, limit: int = 50, offset: int = 0
+    ) -> List[dict]:
+        query = f"""
+            SELECT
+                title, company, city, url, contract_type,
+                target_diploma_level, source, scraped_at
+            FROM `{self.table_id}`
+            WHERE scraped_at >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 120 DAY)
+            AND search_query = @search_query
+            ORDER BY scraped_at DESC
+            LIMIT @limit OFFSET @offset
+        """
+
+        job_config = bigquery.QueryJobConfig(
+            query_parameters=[
+                bigquery.ScalarQueryParameter("search_query", "STRING", search_query),
+                bigquery.ScalarQueryParameter("limit", "INT64", limit),
+                bigquery.ScalarQueryParameter("offset", "INT64", offset),
+            ]
+        )
+
+        query_job = self.client.query(query, job_config=job_config)
+
+        results = []
+        for row in query_job:
+            results.append(
+                {
+                    "title": row.title,
+                    "company": row.company,
+                    "city": row.city,
+                    "url": row.url,
+                    "contract_type": row.contract_type,
+                    "target_diploma_level": row.target_diploma_level,
+                    "source": row.source,
+                    "scraped_at": row.scraped_at,
+                }
+            )
+
+        return results

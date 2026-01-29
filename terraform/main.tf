@@ -374,6 +374,12 @@ resource "google_bigquery_table" "job_table" {
     schema = <<EOF
 [
   {
+    "name": "search_query",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Search query"
+  },
+  {
     "name": "job_hash",
     "type": "STRING",
     "mode": "REQUIRED",
@@ -490,6 +496,11 @@ resource "google_cloud_run_v2_service" "jobnexus_frontend" {
 
       ports {
         container_port = 8080
+      }
+
+      env {
+        name = "BACKEND_URL"
+        value = google_cloud_run_v2_service.jobnexus_service.uri
       }
 
       env {

@@ -69,6 +69,8 @@ class OrchestratorService:
             if isinstance(r, Exception):
                 self.logger.error("Failed to get jobs from a provider", exc_info=r)
             else:
+                for job in r:
+                    job.search_query = query
                 jobs.extend(r)
 
         try:
