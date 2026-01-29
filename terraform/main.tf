@@ -60,6 +60,37 @@ resource "google_project_iam_member" "run_bq_read_session_user" {
   member  = "serviceAccount:${google_service_account.run_sa.email}"
 }
 
+resource "google_service_account" "build_sa" {
+  account_id   = "jobnexus-build-sa"
+  display_name = "Cloud Build Service Account"
+}
+
+resource "google_project_iam_member" "build_logs" {
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.build_sa.email}"
+}
+
+resource "google_artifact_registry_repository_iam_member" "build_push" {
+  project    = var.project_id
+  location   = var.region
+  repository = google_artifact_registry_repository.jobnexus_repo.name
+  role       = "roles/artifactregistry.writer"
+  member     = "serviceAccount:${google_service_account.build_sa.email}"
+}
+
+resource "google_project_iam_member" "build_run_admin" {
+  project = var.project_id
+  role    = "roles/run.developer"
+  member  = "serviceAccount:${google_service_account.build_sa.email}"
+}
+
+resource "google_service_account_iam_member" "build_act_as_run_sa" {
+  service_account_id = google_service_account.run_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.build_sa.email}"
+}
+
 # ------------------------------------------------------------------------------
 # Artifact Registry
 # ------------------------------------------------------------------------------
@@ -561,7 +592,7 @@ resource "google_cloudbuild_trigger" "backend_trigger" {
 
   description = "Backend trigger"
 
-  service_account = "projects/${var.project_id}/serviceAccounts/${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+  service_account = google_service_account.build_sa.id
 
   repository_event_config {
     repository = google_cloudbuildv2_repository.jobnexus_repo_link.id
@@ -581,7 +612,7 @@ resource "google_cloudbuild_trigger" "frontend_trigger" {
 
   description = "Frontend trigger"
 
-  service_account = "projects/${var.project_id}/serviceAccounts/${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+  service_account = google_service_account.build_sa.id
 
   repository_event_config {
     repository = google_cloudbuildv2_repository.jobnexus_repo_link.id
