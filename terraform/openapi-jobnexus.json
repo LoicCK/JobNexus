@@ -3,7 +3,7 @@
   "info": {
     "title": "JobNexus API",
     "description": "API Gateway for JobNexus job search services, centralizing access to multiple job board aggregators.",
-    "version": "1.0.0"
+    "version": "0.1.0"
   },
   "security": [
     {
@@ -32,9 +32,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object"
-                }
+                "schema": {}
               }
             }
           }
@@ -50,9 +48,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object"
-                }
+                "schema": {}
               }
             }
           }
@@ -67,46 +63,46 @@
           {
             "name": "longitude",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "number",
-              "default": 2.3522
+              "title": "Longitude"
             }
           },
           {
             "name": "latitude",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "number",
-              "default": 48.8566
+              "title": "Latitude"
             }
           },
           {
             "name": "radius",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "integer",
-              "default": 30
+              "title": "Radius"
             }
           },
           {
             "name": "insee",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string",
-              "default": "75056"
+              "title": "Insee"
             }
           },
           {
             "name": "romes",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string",
-              "default": "M1805"
+              "title": "Romes"
             }
           }
         ],
@@ -115,9 +111,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object"
-                }
+                "schema": {}
               }
             }
           },
@@ -142,10 +136,10 @@
           {
             "name": "q",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string",
-              "default": "ingénieur cloud"
+              "title": "Q"
             }
           }
         ],
@@ -154,9 +148,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object"
-                }
+                "schema": {}
               }
             }
           },
@@ -181,46 +173,46 @@
           {
             "name": "q",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string",
-              "default": "ingénieur cloud"
+              "title": "Q"
             }
           },
           {
             "name": "longitude",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "number",
-              "default": 2.3522
+              "title": "Longitude"
             }
           },
           {
             "name": "latitude",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "number",
-              "default": 48.8566
+              "title": "Latitude"
             }
           },
           {
             "name": "radius",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "integer",
-              "default": 30
+              "title": "Radius"
             }
           },
           {
             "name": "insee",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string",
-              "default": "75056"
+              "title": "Insee"
             }
           }
         ],
@@ -229,9 +221,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object"
-                }
+                "schema": {}
               }
             }
           },
@@ -258,34 +248,35 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "title": "Q"
             }
           },
           {
             "name": "latitude",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "number",
-              "default": 48.85341
+              "title": "Latitude"
             }
           },
           {
             "name": "longitude",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "number",
-              "default": 2.3488
+              "title": "Longitude"
             }
           },
           {
             "name": "radius",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "integer",
-              "default": 20
+              "title": "Radius"
             }
           }
         ],
@@ -294,9 +285,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object"
-                }
+                "schema": {}
               }
             }
           },
@@ -321,19 +310,19 @@
           {
             "name": "q",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string",
-              "default": "Cloud"
+              "title": "Q"
             }
           },
           {
             "name": "insee",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string",
-              "default": "75056"
+              "title": "Insee"
             }
           }
         ],
@@ -342,9 +331,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object"
-                }
+                "schema": {}
               }
             }
           },
@@ -372,37 +359,50 @@
     },
     "schemas": {
       "HTTPValidationError": {
-        "type": "object",
         "properties": {
           "detail": {
-            "type": "array",
             "items": {
               "$ref": "#/components/schemas/ValidationError"
-            }
+            },
+            "type": "array",
+            "title": "Detail"
           }
-        }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
       },
       "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
         "type": "object",
         "required": [
           "loc",
           "msg",
           "type"
         ],
-        "properties": {
-          "loc": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "msg": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          }
-        }
+        "title": "ValidationError"
       }
     }
   }

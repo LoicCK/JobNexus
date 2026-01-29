@@ -449,7 +449,7 @@ resource "google_cloud_scheduler_job" "data_job" {
 
   http_target {
     http_method = "GET"
-    uri = "${google_cloud_run_v2_service.jobnexus_service.uri}/search?q=${each.value}"
+    uri = "${google_cloud_run_v2_service.jobnexus_service.uri}/search?q=${each.value}&latitude=${var.default_latitude}&longitude=${var.default_longitude}&radius=${var.default_radius}&insee=${var.default_insee}"
     oidc_token {
       service_account_email = google_service_account.scheduler_sa.email
     }
