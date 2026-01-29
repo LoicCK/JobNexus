@@ -48,20 +48,19 @@ class OrchestratorService:
 
         romes = await self.rome_service.search_rome(query)
 
-        if not romes:
-            return await self.wttj_service.search_jobs(
-                query, longitude, latitude, radius
-            )
-
         codes = [rome.code for rome in romes]
         codes = ",".join(codes)
         jobs = []
 
         searches = [
-            self.lba_service.search_jobs(latitude, longitude, radius, insee, codes),
             self.wttj_service.search_jobs(query, latitude, longitude, radius),
             self.apec_service.search_jobs(query, insee),
         ]
+
+        if romes:
+            searches.append(
+                self.lba_service.search_jobs(latitude, longitude, radius, insee, codes)
+            )
 
         results = await asyncio.gather(*searches, return_exceptions=True)
 
@@ -69,6 +68,8 @@ class OrchestratorService:
             if isinstance(r, Exception):
                 self.logger.error("Failed to get jobs from a provider", exc_info=r)
             else:
+                for job in r:
+                    job.search_query = query
                 jobs.extend(r)
 
         try:

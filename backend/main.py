@@ -88,3 +88,9 @@ async def get_jobs_by_apec(q: str, insee: str):
     apec_jobs = await apec_service.search_jobs(q, insee)
 
     return {"count": len(apec_jobs), "results": apec_jobs}
+
+
+@app.get("/opportunities")
+def get_opportunities(q: str, limit: int = 50, skip: int = 0):
+    jobs = data_service.get_opportunities(search_query=q, limit=limit, offset=skip)
+    return {"count": len(jobs), "results": jobs}

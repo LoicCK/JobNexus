@@ -14,7 +14,8 @@ dependencies = [
     "google-cloud-firestore (>=2.21.0,<3.0.0)",
     "algoliasearch (<4.0)",
     "google-cloud-bigquery (>=3.40.0,<4.0.0)",
-    "httpx (>=0.28.1,<0.29.0)"
+    "httpx (>=0.28.1,<0.29.0)",
+    "google-cloud-bigquery-storage (>=2.36.0,<3.0.0)"
 ]
 
 [tool.poetry]
