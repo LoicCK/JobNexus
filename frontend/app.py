@@ -25,7 +25,7 @@ st.set_page_config(page_title=PAGE_TITLE, layout="wide")
 def load_data() -> pd.DataFrame:
     # Retrieve Google Cloud Project ID from environment variables
     try:
-        project_id = google.auth.default()
+        _, project_id = google.auth.default()
     except google.auth.exceptions.DefaultCredentialsError:
         project_id = None
     if not project_id:
