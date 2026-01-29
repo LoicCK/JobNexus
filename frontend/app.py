@@ -1,8 +1,10 @@
-import streamlit as st
-import pandas as pd
-import os
-from google.cloud import bigquery as bq
 from datetime import date
+
+import google.auth
+import google.auth.exceptions
+import pandas as pd
+import streamlit as st
+from google.cloud import bigquery as bq
 
 # Thanks, Gemini, for the comments
 
@@ -22,7 +24,10 @@ st.set_page_config(page_title=PAGE_TITLE, layout="wide")
 @st.cache_data(ttl=3600)
 def load_data() -> pd.DataFrame:
     # Retrieve Google Cloud Project ID from environment variables
-    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
+    try:
+        project_id = google.auth.default()
+    except google.auth.exceptions.DefaultCredentialsError:
+        project_id = None
     if not project_id:
         st.warning("GOOGLE_CLOUD_PROJECT environment variable not set.")
         return _get_empty_df()
@@ -33,12 +38,14 @@ def load_data() -> pd.DataFrame:
 
     # SQL Query: Selects specific columns and filters by 'scraped_at' timestamp
     query = f"""
-        SELECT
-            title, company, city, url, contract_type,
-            target_diploma_level, source, scraped_at
-        FROM `{table_ref}`
-        WHERE scraped_at >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL {DAYS_LOOKBACK} DAY)
-        ORDER BY scraped_at DESC
+            SELECT
+                title, company, city, url, contract_type,
+                target_diploma_level, source, scraped_at
+            FROM `{table_ref}`
+            WHERE scraped_at >= TIMESTAMP_SUB(
+                CURRENT_TIMESTAMP(), INTERVAL {DAYS_LOOKBACK} DAY
+            )
+            ORDER BY scraped_at DESC
     """
 
     try:
@@ -58,7 +65,8 @@ def load_data() -> pd.DataFrame:
         return _get_empty_df()
 
 
-# Helper function to return a structured empty DataFrame (prevents crashes if query fails)
+# Helper function to return a structured empty DataFrame
+# (prevents crashes if query fails)
 def _get_empty_df() -> pd.DataFrame:
     columns = [
         "title",
@@ -103,7 +111,8 @@ def render_daily_offers(df: pd.DataFrame):
 
     if not todays_offers.empty:
         st.subheader(f"🔥 Daily New Offers ({len(todays_offers)})")
-        # specific dataframe config to turn the URL string into a clickable "Apply" button
+        # specific dataframe config to turn the URL string into a clickable
+        # "Apply" button
         st.dataframe(
             todays_offers[["title", "company", "city", "url"]],
             width="stretch",
