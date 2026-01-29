@@ -526,3 +526,70 @@ resource "google_cloud_run_v2_service_iam_member" "public_access" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+
+# ------------------------------------------------------------------------------
+# Cloud Build Triggers
+# ------------------------------------------------------------------------------
+
+resource "google_cloudbuildv2_connection" "github_connection" {
+  project  = var.project_id
+  location = var.region
+  name     = "LoicCK-Github"
+
+  github_config {
+  }
+
+  lifecycle {
+    ignore_changes = [
+      github_config
+    ]
+  }
+}
+
+resource "google_cloudbuildv2_repository" "jobnexus_repo_link" {
+  project           = var.project_id
+  location          = var.region
+  name              = "jobnexus-repo"
+  parent_connection = google_cloudbuildv2_connection.github_connection.name
+  remote_uri        = "https://github.com/LoicCK/JobNexus.git"
+}
+
+resource "google_cloudbuild_trigger" "backend_trigger" {
+  project  = var.project_id
+  location = var.region
+  name     = "jobnexus-backend-trigger"
+
+  description = "Backend trigger"
+
+  service_account = "projects/${var.project_id}/serviceAccounts/${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+
+  repository_event_config {
+    repository = google_cloudbuildv2_repository.jobnexus_repo_link.id
+    push {
+      branch = "^main$"
+    }
+  }
+
+  included_files = ["backend/**"]
+  filename       = "backend/cloudbuild.yaml"
+}
+
+resource "google_cloudbuild_trigger" "frontend_trigger" {
+  project  = var.project_id
+  location = var.region
+  name     = "jobnexus-frontend-trigger"
+
+  description = "Frontend trigger"
+
+  service_account = "projects/${var.project_id}/serviceAccounts/${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+
+  repository_event_config {
+    repository = google_cloudbuildv2_repository.jobnexus_repo_link.id
+    push {
+      branch = "^main$"
+    }
+  }
+
+  included_files = ["frontend/**"]
+  filename       = "frontend/cloudbuild.yaml"
+}
