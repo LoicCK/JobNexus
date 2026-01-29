@@ -20,6 +20,10 @@ class WelcomeService:
         headers = {
             "X-Algolia-Application-Id": self.app_id,
             "X-Algolia-API-Key": self.api_key,
+            "Referer": "https://www.welcometothejungle.com/",
+            "Origin": "https://www.welcometothejungle.com",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/"
+            "537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         }
 
         payload = {
