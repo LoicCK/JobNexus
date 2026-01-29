@@ -47,27 +47,27 @@ def read_health():
 
 
 @app.get("/lba")
-def get_jobs_by_lba(
+async def get_jobs_by_lba(
     longitude: float = 2.3522,
     latitude: float = 48.8566,
     radius: int = 30,
     insee: str = "75056",
     romes: str = "M1805",
 ):
-    jobs = lba_service.search_jobs(longitude, latitude, radius, insee, romes)
+    jobs = await lba_service.search_jobs(longitude, latitude, radius, insee, romes)
 
     return {"count": len(jobs), "results": jobs}
 
 
 @app.get("/rome")
-def get_rome_codes(q: str = "ingénieur cloud"):
-    codes = rome_service.search_rome(q)
+async def get_rome_codes(q: str = "ingénieur cloud"):
+    codes = await rome_service.search_rome(q)
 
     return {"count": len(codes), "results": codes}
 
 
 @app.get("/search")
-def get_jobs_by_query(
+async def get_jobs_by_query(
     background_tasks: BackgroundTasks,
     q: str = "ingénieur cloud",
     longitude: float = 2.3522,
@@ -75,7 +75,7 @@ def get_jobs_by_query(
     radius: int = 30,
     insee: str = "75056",
 ):
-    jobs = orchestrator_service.find_jobs_by_query(
+    jobs = await orchestrator_service.find_jobs_by_query(
         q, longitude, latitude, radius, insee, background_tasks
     )
 
@@ -83,16 +83,16 @@ def get_jobs_by_query(
 
 
 @app.get("/wttj")
-def get_jobs_by_wttj(
+async def get_jobs_by_wttj(
     q: str, latitude: float = 48.85341, longitude: float = 2.3488, radius: int = 20
 ):
-    wttj_jobs = wttj_service.search_jobs(q, latitude, longitude, radius)
+    wttj_jobs = await wttj_service.search_jobs(q, latitude, longitude, radius)
 
     return {"count": len(wttj_jobs), "results": wttj_jobs}
 
 
 @app.get("/apec")
-def get_jobs_by_apec(q: str = "Cloud", insee: str = "75056"):
-    apec_jobs = apec_service.search_jobs(q, insee)
+async def get_jobs_by_apec(q: str = "Cloud", insee: str = "75056"):
+    apec_jobs = await apec_service.search_jobs(q, insee)
 
     return {"count": len(apec_jobs), "results": apec_jobs}

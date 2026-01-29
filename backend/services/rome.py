@@ -1,7 +1,7 @@
 from time import time
 from typing import List
 
-import requests
+import httpx
 
 from models.rome_code import RomeCode
 
@@ -15,7 +15,7 @@ class RomeService:
         self.token = None
         self.expiration_time = -1
 
-    def search_rome(self, query: str) -> List[RomeCode]:
+    async def search_rome(self, query: str) -> List[RomeCode]:
         if time() >= self.expiration_time:
             oauth_payload = {
                 "grant_type": "client_credentials",
@@ -27,9 +27,10 @@ class RomeService:
             oauth_headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
             try:
-                response = requests.post(
-                    self.credential_url, data=oauth_payload, headers=oauth_headers
-                )
+                async with httpx.AsyncClient() as client:
+                    response = await client.post(
+                        self.credential_url, data=oauth_payload, headers=oauth_headers
+                    )
                 response.raise_for_status()
                 data = response.json()
             except Exception as e:
@@ -43,7 +44,8 @@ class RomeService:
         headers = {"Authorization": f"Bearer {self.token}"}
 
         try:
-            response = requests.get(self.url, params=params, headers=headers)
+            async with httpx.AsyncClient() as client:
+                response = await client.get(self.url, params=params, headers=headers)
             response.raise_for_status()
             data = response.json()
         except Exception as e:

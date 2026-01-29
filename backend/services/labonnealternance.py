@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-import requests
+import httpx
 
 from models.job import Job
 
@@ -10,7 +10,7 @@ class LaBonneAlternanceService:
         self.api_key = api_key
         self.url = "https://labonnealternance.apprentissage.beta.gouv.fr/api/v1/jobs"
 
-    def search_jobs(
+    async def search_jobs(
         self, latitude: float, longitude: float, radius: int, insee: str, romes: str
     ) -> List[Job]:
 
@@ -29,7 +29,8 @@ class LaBonneAlternanceService:
             headers["Authorization"] = f"Bearer {self.api_key}"
 
         try:
-            response = requests.get(self.url, params=params, headers=headers)
+            async with httpx.AsyncClient() as client:
+                response = await client.get(self.url, params=params, headers=headers)
             response.raise_for_status()
             data = response.json()
         except Exception as e:
