@@ -14,7 +14,7 @@ graph TD
     subgraph Providers [Job Providers]
         direction LR
         APEC
-        FT[France Travail]
+        LBA[La Bonne Alternance]
         WTTJ[Welcome to the Jungle]
     end
 
