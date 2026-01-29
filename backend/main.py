@@ -32,13 +32,7 @@ app = FastAPI(title="JobNexus")
 
 @app.get("/")
 def read_root():
-    client_id = os.environ.get("FT_CLIENT_ID", "Non défini")
-    masked_id = client_id[:4] + "*" * 10 if client_id != "Non défini" else "Non défini"
-    return {
-        "Hello": "Welcome to JobNexus",
-        "Environment": "Production" if client_id != "Non défini" else "Local",
-        "Client_ID_Check": masked_id,
-    }
+    return {"Hello": "Welcome to JobNexus"}
 
 
 @app.get("/health")
