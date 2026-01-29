@@ -40,7 +40,9 @@ class OrchestratorService:
         insee: str,
         background_tasks: BackgroundTasks,
     ) -> List[Job]:
-        cached_jobs = self.cache_service.get_jobs(query, latitude, longitude, radius)
+        cached_jobs = await self.cache_service.get_jobs(
+            query, latitude, longitude, radius
+        )
         if cached_jobs is not None:
             return cached_jobs
 
@@ -70,7 +72,9 @@ class OrchestratorService:
                 jobs.extend(r)
 
         try:
-            self.cache_service.save_jobs(query, latitude, longitude, radius, jobs)
+            background_tasks.add_task(
+                self.cache_service.save_jobs, query, latitude, longitude, radius, jobs
+            )
         except Exception:
             self.logger.error("Failed cache jobs to FireStore", exc_info=True)
 
