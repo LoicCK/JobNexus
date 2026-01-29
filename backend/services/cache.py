@@ -9,7 +9,7 @@ from models.job import Job
 
 class CacheService:
     def __init__(self):
-        self.db = firestore.Client()
+        self.db = firestore.AsyncClient()
         self.collection_name = "job_searches"
 
     def _generate_cache_key(
@@ -34,12 +34,12 @@ class CacheService:
             document_content
         )
 
-    def get_jobs(
+    async def get_jobs(
         self, query: str, lat: float, lon: float, radius: int
     ) -> List[Job] | None:
         cache_key = self._generate_cache_key(query, lat, lon, radius)
         doc_ref = self.db.collection(self.collection_name).document(cache_key)
-        doc_snapshot = doc_ref.get()
+        doc_snapshot = await doc_ref.get()
         if not doc_snapshot.exists:
             return None
         data = doc_snapshot.to_dict()

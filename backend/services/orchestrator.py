@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import List
 
@@ -30,7 +31,7 @@ class OrchestratorService:
         self.data_service = data_service
         self.logger = logging.getLogger(__name__)
 
-    def find_jobs_by_query(
+    async def find_jobs_by_query(
         self,
         query: str,
         longitude: float,
@@ -39,37 +40,47 @@ class OrchestratorService:
         insee: str,
         background_tasks: BackgroundTasks,
     ) -> List[Job]:
-        cached_jobs = self.cache_service.get_jobs(query, latitude, longitude, radius)
+        cached_jobs = await self.cache_service.get_jobs(
+            query, latitude, longitude, radius
+        )
         if cached_jobs is not None:
             return cached_jobs
-        romes = self.rome_service.search_rome(query)
+
+        romes = await self.rome_service.search_rome(query)
+
         if not romes:
-            return self.wttj_service.search_jobs(query, longitude, latitude, radius)
+            return await self.wttj_service.search_jobs(
+                query, longitude, latitude, radius
+            )
+
         codes = [rome.code for rome in romes]
         codes = ",".join(codes)
         jobs = []
+
+        searches = [
+            self.lba_service.search_jobs(latitude, longitude, radius, insee, codes),
+            self.wttj_service.search_jobs(query, latitude, longitude, radius),
+            self.apec_service.search_jobs(query, insee),
+        ]
+
+        results = await asyncio.gather(*searches, return_exceptions=True)
+
+        for r in results:
+            if isinstance(r, Exception):
+                self.logger.error("Failed to get jobs from a provider", exc_info=r)
+            else:
+                jobs.extend(r)
+
         try:
-            jobs.extend(
-                self.lba_service.search_jobs(latitude, longitude, radius, insee, codes)
+            background_tasks.add_task(
+                self.cache_service.save_jobs, query, latitude, longitude, radius, jobs
             )
-        except Exception:
-            self.logger.error("Failed to get jobs on LBA", exc_info=True)
-        try:
-            jobs.extend(
-                self.wttj_service.search_jobs(query, latitude, longitude, radius)
-            )
-        except Exception:
-            self.logger.error("Failed to get jobs on WTTJ", exc_info=True)
-        try:
-            jobs.extend(self.apec_service.search_jobs(query, insee))
-        except Exception:
-            self.logger.error("Failed to get jobs on APEC", exc_info=True)
-        try:
-            self.cache_service.save_jobs(query, latitude, longitude, radius, jobs)
         except Exception:
             self.logger.error("Failed cache jobs to FireStore", exc_info=True)
+
         try:
             background_tasks.add_task(self.data_service.save_jobs_data, jobs)
         except Exception:
             self.logger.error("Failed to save jobs to BigQuery", exc_info=True)
+
         return jobs

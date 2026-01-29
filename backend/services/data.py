@@ -3,6 +3,7 @@ import json
 import os
 from datetime import datetime, timezone
 from typing import List
+from urllib.parse import urlparse, urlunparse
 
 from google.cloud import bigquery
 
@@ -17,7 +18,11 @@ class DataService:
             raise ValueError("Environment variable BIGQUERY_TABLE_ID is not set")
 
     def generate_job_hash(self, job: Job) -> str:
-        raw_string = f"{job.title}{job.company}{job.url}".lower()
+        parsed = urlparse(job.url)
+        clean_url = urlunparse(
+            (parsed.scheme, parsed.netloc, parsed.path, parsed.params, "", "")
+        )
+        raw_string = f"{job.title}{job.company}{clean_url}".lower()
         return hashlib.sha256(raw_string.encode("utf-8")).hexdigest()
 
     def get_job_dict(self, job: Job) -> dict:

@@ -26,3 +26,27 @@ variable "jobs" {
     "Cloud-Computing"
   ]
 }
+
+variable "default_latitude" {
+  description = "Default latitude for job search (Paris)"
+  type        = string
+  default     = "48.8566"
+}
+
+variable "default_longitude" {
+  description = "Default longitude for job search (Paris)"
+  type        = string
+  default     = "2.3522"
+}
+
+variable "default_radius" {
+  description = "Search radius in km"
+  type        = string
+  default     = "30"
+}
+
+variable "default_insee" {
+  description = "INSEE code for location"
+  type        = string
+  default     = "75056"
+}

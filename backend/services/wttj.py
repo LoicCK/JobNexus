@@ -1,7 +1,6 @@
 from typing import Any, Dict, List
 
-from algoliasearch.configs import SearchConfig
-from algoliasearch.search_client import SearchClient
+import httpx
 
 from models.job import Job
 
@@ -12,15 +11,23 @@ class WelcomeService:
         self.api_key = wttj_api_key
         self.index = "wttj_jobs_production_fr"
 
-        config = SearchConfig(wttj_app_id, wttj_api_key)
-        config.headers["Referer"] = "https://www.welcometothejungle.com/"
-        self.client = SearchClient.create_with_config(config)
-        self.index = self.client.init_index(self.index)
-
-    def search_jobs(
+    async def search_jobs(
         self, query: str, latitude: float, longitude: float, radius: int
     ) -> List[Job]:
-        search_params = {
+
+        url = f"https://{self.app_id}-dsn.algolia.net/1/indexes/{self.index}/query"
+
+        headers = {
+            "X-Algolia-Application-Id": self.app_id,
+            "X-Algolia-API-Key": self.api_key,
+            "Referer": "https://www.welcometothejungle.com/",
+            "Origin": "https://www.welcometothejungle.com",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/"
+            "537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        }
+
+        payload = {
+            "query": query,
             "filters": "contract_type:apprenticeship",
             "hitsPerPage": 50,
             "attributesToRetrieve": [
@@ -35,7 +42,12 @@ class WelcomeService:
         }
 
         try:
-            hits = self.index.search(query, search_params)["hits"]
+            async with httpx.AsyncClient() as client:
+                result = await client.post(url, json=payload, headers=headers)
+
+            result.raise_for_status()
+
+            hits = result.json()["hits"]
             results = [self._parse_algolia_hit(hit) for hit in hits]
             return results
         except Exception as e:
