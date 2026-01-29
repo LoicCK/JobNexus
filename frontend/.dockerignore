@@ -1,26 +1,30 @@
-../terraform/
-terraform.tfstate
-terraform.tfstate.backup
-
 .git/
 .gitignore
 
+# Python cache & artifacts
 __pycache__/
 *.py[cod]
 *.so
-.venv/
-env/
-venv/
 .pytest_cache/
 .coverage
 htmlcov/
 
+# Local environments
+.venv/
+env/
+venv/
+
+# IDE settings
 .vscode/
 .idea/
 
+# Documentation & Configs not needed in image
 README.md
 cloudbuild.yaml
+
+# Secrets & Local Configs (CRITICAL)
 .env
 .env.example
-
-frontend/
+gcp_credentials.json
+terraform.tfstate
+terraform.tfstate.backup
