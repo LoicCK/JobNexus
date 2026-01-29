@@ -1,7 +1,8 @@
 from typing import List
 
 import requests
-from backend.models.job import Job
+
+from models.job import Job
 
 
 class ApecService:

@@ -4,8 +4,9 @@ import os
 from datetime import datetime, timezone
 from typing import List
 
-from backend.models.job import Job
 from google.cloud import bigquery
+
+from models.job import Job
 
 
 class DataService:

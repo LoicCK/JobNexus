@@ -2,7 +2,8 @@ from typing import Any, Dict, List
 
 from algoliasearch.configs import SearchConfig
 from algoliasearch.search_client import SearchClient
-from backend.models.job import Job
+
+from models.job import Job
 
 
 class WelcomeService:

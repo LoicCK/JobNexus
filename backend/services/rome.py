@@ -2,7 +2,8 @@ from time import time
 from typing import List
 
 import requests
-from backend.models.rome_code import RomeCode
+
+from models.rome_code import RomeCode
 
 
 class RomeService:
