@@ -1,6 +1,8 @@
+import logging
 import os
+import traceback
 
-from fastapi import BackgroundTasks, FastAPI
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 
 from services.apec import ApecService
 from services.cache import CacheService
@@ -69,11 +71,16 @@ async def get_jobs_by_query(
     radius: int,
     insee: str,
 ):
-    jobs = await orchestrator_service.find_jobs_by_query(
-        q, longitude, latitude, radius, insee, background_tasks
-    )
+    try:
+        jobs = await orchestrator_service.find_jobs_by_query(
+            q, longitude, latitude, radius, insee, background_tasks
+        )
 
-    return {"count": len(jobs), "results": jobs}
+        return {"count": len(jobs), "results": jobs}
+    except Exception as e:
+        logging.error(f"Critical error: {str(e)}")
+        logging.error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/wttj")
