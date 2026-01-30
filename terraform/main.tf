@@ -99,6 +99,12 @@ resource "google_cloud_run_v2_service_iam_member" "frontend_backend_access" {
   member   = "serviceAccount:${google_service_account.run_sa.email}"
 }
 
+resource "google_project_iam_member" "run_firestore_user" {
+  project = var.project_id
+  role    = "roles/datastore.user"
+  member  = "serviceAccount:${google_service_account.run_sa.email}"
+}
+
 # ------------------------------------------------------------------------------
 # Artifact Registry
 # ------------------------------------------------------------------------------
