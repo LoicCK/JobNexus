@@ -65,11 +65,11 @@ class DataService:
         ON T.job_hash = S.job_hash
         WHEN NOT MATCHED THEN
           INSERT (
-              job_hash, title, company, city, url,
+              search_query, job_hash, title, company, city, url,
               contract_type, target_diploma_level, source, scraped_at
           )
           VALUES (
-              S.job_hash, S.title, S.company, S.city, S.url,
+              S.search_query, S.job_hash, S.title, S.company, S.city, S.url,
               S.contract_type, S.target_diploma_level, S.source, S.scraped_at
           )
         """
