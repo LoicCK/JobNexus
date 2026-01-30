@@ -72,16 +72,21 @@ class OrchestratorService:
                     job.search_query = query
                 jobs.extend(r)
 
-        try:
-            background_tasks.add_task(
-                self.cache_service.save_jobs, query, latitude, longitude, radius, jobs
-            )
-        except Exception:
-            self.logger.error("Failed cache jobs to FireStore", exc_info=True)
-
-        try:
-            background_tasks.add_task(self.data_service.save_jobs_data, jobs)
-        except Exception:
-            self.logger.error("Failed to save jobs to BigQuery", exc_info=True)
+        background_tasks.add_task(
+            self._safe_save_jobs_cache, query, latitude, longitude, radius, jobs
+        )
+        background_tasks.add_task(self._safe_save_jobs_data, jobs)
 
         return jobs
+
+    async def _safe_save_jobs_cache(self, query, latitude, longitude, radius, jobs):
+        try:
+            await self.cache_service.save_jobs(query, latitude, longitude, radius, jobs)
+        except Exception as e:
+            self.logger.error(f"Background task failed: {str(e)}", exc_info=True)
+
+    async def _safe_save_jobs_data(self, jobs):
+        try:
+            self.data_service.save_jobs_data(jobs)
+        except Exception as e:
+            self.logger.error(f"Background task failed: {str(e)}", exc_info=True)

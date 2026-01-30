@@ -18,7 +18,7 @@ class CacheService:
         raw = f"{query}_{lat:.4f}_{lon:.4f}_{radius}"
         return hashlib.md5(raw.encode("utf-8")).hexdigest()
 
-    def save_jobs(
+    async def save_jobs(
         self, query: str, lat: float, lon: float, radius: int, jobs: List[Job]
     ):
         research_date = datetime.now(timezone.utc)
@@ -30,7 +30,7 @@ class CacheService:
             "params": {"query": query, "lat": lat, "lon": lon, "radius": radius},
             "jobs": jobs_data,
         }
-        self.db.collection(self.collection_name).document(cache_key).set(
+        await self.db.collection(self.collection_name).document(cache_key).set(
             document_content
         )
 

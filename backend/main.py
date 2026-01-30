@@ -1,7 +1,9 @@
 import logging
 import os
+import sys
 import traceback
 
+import google.cloud.logging
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 
 from services.apec import ApecService
@@ -11,6 +13,18 @@ from services.labonnealternance import LaBonneAlternanceService
 from services.orchestrator import OrchestratorService
 from services.rome import RomeService
 from services.wttj import WelcomeService
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    stream=sys.stdout,
+)
+
+try:
+    client = google.cloud.logging.Client()
+    client.setup_logging()
+except Exception as e:
+    logging.warning(f"Failed to activate Cloud Logging: {str(e)}")
 
 ft_id = os.environ.get("FT_CLIENT_ID")
 ft_secret = os.environ.get("FT_CLIENT_SECRET")
