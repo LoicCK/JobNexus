@@ -136,7 +136,7 @@ resource "google_cloud_run_v2_service" "jobnexus_frontend" {
 
   template {
     timeout = "300s"
-    service_account = google_service_account.run_sa.email
+    service_account = google_service_account.front_sa.email
 
     scaling {
       max_instance_count = 10

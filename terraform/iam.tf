@@ -92,14 +92,6 @@ resource "google_service_account_iam_member" "build_act_as_run_sa" {
   member             = "serviceAccount:${google_service_account.build_sa.email}"
 }
 
-resource "google_cloud_run_v2_service_iam_member" "frontend_backend_access" {
-  project  = var.project_id
-  location = var.region
-  name     = google_cloud_run_v2_service.jobnexus_service.name
-  role     = "roles/run.invoker"
-  member   = "serviceAccount:${google_service_account.run_sa.email}"
-}
-
 resource "google_project_iam_member" "run_firestore_user" {
   project = var.project_id
   role    = "roles/datastore.user"
@@ -112,4 +104,17 @@ resource "google_cloud_run_v2_service_iam_member" "public_access" {
   name     = google_cloud_run_v2_service.jobnexus_frontend.name
   role     = "roles/run.invoker"
   member   = "allUsers"
+}
+
+resource "google_service_account" "front_sa" {
+  account_id   = "jobnexus-front-sa"
+  display_name = "Cloud Run Frontend identity"
+}
+
+resource "google_cloud_run_v2_service_iam_member" "frontend_invoker" {
+  project  = var.project_id
+  location = var.region
+  name     = google_cloud_run_v2_service.jobnexus_service.name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.front_sa.email}"
 }
