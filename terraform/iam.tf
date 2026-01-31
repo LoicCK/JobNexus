@@ -51,12 +51,6 @@ resource "google_project_iam_member" "run_bq_job_user" {
   member  = "serviceAccount:${google_service_account.run_sa.email}"
 }
 
-resource "google_project_iam_member" "run_bq_read_session_user" {
-  project = var.project_id
-  role    = "roles/bigquery.readSessionUser"
-  member  = "serviceAccount:${google_service_account.run_sa.email}"
-}
-
 resource "google_service_account" "build_sa" {
   account_id   = "jobnexus-build-sa"
   display_name = "Cloud Build Service Account"
