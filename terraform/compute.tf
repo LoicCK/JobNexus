@@ -9,7 +9,6 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
   location = var.region
   name     = "jobnexus-service"
 
-  # Allow traffic from everywhere (public ingress)
   ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {

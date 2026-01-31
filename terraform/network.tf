@@ -54,8 +54,6 @@ resource "google_api_gateway_gateway" "jobnexus_gateway" {
   display_name = "jobnexus-gateway"
 }
 
-
-
 # ------------------------------------------------------------------------------
 # Cloud Scheduler
 # ------------------------------------------------------------------------------
