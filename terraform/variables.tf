@@ -50,3 +50,15 @@ variable "default_insee" {
   type        = string
   default     = "75056"
 }
+
+variable "run_sa_secrets" {
+  description = "IDs of the secrets the run SA needs access to"
+  type = set(string)
+  default = [
+    "france-travail-id",
+    "france-travail-secret",
+    "la-bonne-alternance-api-key",
+    "wttj-api-key",
+    "wttj-app-id"
+  ]
+}
