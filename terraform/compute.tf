@@ -23,7 +23,7 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
     }
 
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/jobnexus-repo/jobnexus-app"
+      image = "${google_artifact_registry_repository.jobnexus_repo.location}-docker.pkg.dev/${google_artifact_registry_repository.jobnexus_repo.project}/${google_artifact_registry_repository.jobnexus_repo.repository_id}/jobnexus-app"
 
       resources {
         limits = {
@@ -144,7 +144,7 @@ resource "google_cloud_run_v2_service" "jobnexus_frontend" {
     }
 
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/jobnexus-repo/jobnexus-frontend"
+      image = "${google_artifact_registry_repository.jobnexus_repo.location}-docker.pkg.dev/${google_artifact_registry_repository.jobnexus_repo.project}/${google_artifact_registry_repository.jobnexus_repo.repository_id}/jobnexus-frontend"
 
       resources {
         limits = {
