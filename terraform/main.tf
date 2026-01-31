@@ -24,11 +24,12 @@ resource "google_service_account" "scheduler_sa" {
 data "google_project" "project" {
 }
 
-# Grant the Cloud Run Service Account access to Secret Manager
-resource "google_project_iam_member" "run_secret_access" {
-  member  = "serviceAccount:${google_service_account.run_sa.email}"
-  project = var.project_id
-  role    = "roles/secretmanager.secretAccessor"
+resource "google_secret_manager_secret_iam_member" "run_sa_access" {
+  for_each  = toset(var.run_sa_secrets)
+  project   = var.project_id
+  secret_id = each.key
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.run_sa.email}"
 }
 
 # Allow the API Gateway Service Account to invoke the Cloud Run service
@@ -249,7 +250,7 @@ resource "google_cloud_run_v2_service" "jobnexus_service" {
   }
 
   depends_on = [
-    google_project_iam_member.run_secret_access
+    google_secret_manager_secret_iam_member.run_sa_access
   ]
 }
 
