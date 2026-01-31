@@ -118,3 +118,9 @@ resource "google_cloud_run_v2_service_iam_member" "frontend_invoker" {
   role     = "roles/run.invoker"
   member   = "serviceAccount:${google_service_account.front_sa.email}"
 }
+
+resource "google_service_account_iam_member" "build_act_as_front_sa" {
+  service_account_id = google_service_account.front_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.build_sa.email}"
+}
