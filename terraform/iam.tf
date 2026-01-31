@@ -76,10 +76,20 @@ resource "google_artifact_registry_repository_iam_member" "build_push" {
   member     = "serviceAccount:${google_service_account.build_sa.email}"
 }
 
-resource "google_project_iam_member" "build_run_admin" {
-  project = var.project_id
-  role    = "roles/run.developer"
-  member  = "serviceAccount:${google_service_account.build_sa.email}"
+resource "google_cloud_run_v2_service_iam_member" "build_manage_backend" {
+  project  = var.project_id
+  location = var.region
+  name     = google_cloud_run_v2_service.jobnexus_service.name
+  role     = "roles/run.developer"
+  member   = "serviceAccount:${google_service_account.build_sa.email}"
+}
+
+resource "google_cloud_run_v2_service_iam_member" "build_manage_frontend" {
+  project  = var.project_id
+  location = var.region
+  name     = google_cloud_run_v2_service.jobnexus_frontend.name
+  role     = "roles/run.developer"
+  member   = "serviceAccount:${google_service_account.build_sa.email}"
 }
 
 resource "google_service_account_iam_member" "build_act_as_run_sa" {
