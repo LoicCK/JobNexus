@@ -1,13 +1,12 @@
 import logging
-import os
 import sys
 import traceback
 
 import google.cloud.logging
-from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 
+import dependencies as dp
 from services.apec import ApecService
-from services.cache import CacheService
 from services.data import DataService
 from services.labonnealternance import LaBonneAlternanceService
 from services.orchestrator import OrchestratorService
@@ -25,23 +24,6 @@ try:
     client.setup_logging()
 except Exception as e:
     logging.warning(f"Failed to activate Cloud Logging: {str(e)}")
-
-ft_id = os.environ.get("FT_CLIENT_ID")
-ft_secret = os.environ.get("FT_CLIENT_SECRET")
-lba_key = os.environ.get("LBA_API_KEY")
-wttj_app_id = os.environ.get("WTTJ_APP_ID")
-wttj_api_key = os.environ.get("WTTJ_API_KEY")
-
-rome_service = RomeService(ft_id, ft_secret)
-lba_service = LaBonneAlternanceService(lba_key)
-wttj_service = WelcomeService(wttj_app_id, wttj_api_key)
-cache_service = CacheService()
-apec_service = ApecService()
-data_service = DataService()
-
-orchestrator_service = OrchestratorService(
-    lba_service, rome_service, wttj_service, cache_service, apec_service, data_service
-)
 
 app = FastAPI(title="JobNexus")
 
@@ -63,6 +45,7 @@ async def get_jobs_by_lba(
     radius: int,
     insee: str,
     romes: str,
+    lba_service: LaBonneAlternanceService = Depends(dp.get_lba_service),
 ):
     jobs = await lba_service.search_jobs(longitude, latitude, radius, insee, romes)
 
@@ -70,7 +53,9 @@ async def get_jobs_by_lba(
 
 
 @app.get("/rome")
-async def get_rome_codes(q: str):
+async def get_rome_codes(
+    q: str, rome_service: RomeService = Depends(dp.get_rome_service)
+):
     codes = await rome_service.search_rome(q)
 
     return {"count": len(codes), "results": codes}
@@ -84,6 +69,7 @@ async def get_jobs_by_query(
     latitude: float,
     radius: int,
     insee: str,
+    orchestrator_service: OrchestratorService = Depends(dp.get_orchestrator_service),
 ):
     try:
         jobs = await orchestrator_service.find_jobs_by_query(
@@ -98,20 +84,33 @@ async def get_jobs_by_query(
 
 
 @app.get("/wttj")
-async def get_jobs_by_wttj(q: str, latitude: float, longitude: float, radius: int):
+async def get_jobs_by_wttj(
+    q: str,
+    latitude: float,
+    longitude: float,
+    radius: int,
+    wttj_service: WelcomeService = Depends(dp.get_wttj_service),
+):
     wttj_jobs = await wttj_service.search_jobs(q, latitude, longitude, radius)
 
     return {"count": len(wttj_jobs), "results": wttj_jobs}
 
 
 @app.get("/apec")
-async def get_jobs_by_apec(q: str, insee: str):
+async def get_jobs_by_apec(
+    q: str, insee: str, apec_service: ApecService = Depends(dp.get_apec_service)
+):
     apec_jobs = await apec_service.search_jobs(q, insee)
 
     return {"count": len(apec_jobs), "results": apec_jobs}
 
 
 @app.get("/opportunities")
-def get_opportunities(q: str, limit: int = 50, skip: int = 0):
+def get_opportunities(
+    q: str,
+    limit: int = 50,
+    skip: int = 0,
+    data_service: DataService = Depends(dp.get_data_service),
+):
     jobs = data_service.get_opportunities(search_query=q, limit=limit, offset=skip)
     return {"count": len(jobs), "results": jobs}
