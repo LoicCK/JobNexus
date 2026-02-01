@@ -131,3 +131,4 @@ generated.tf
 # Specific Backend/Frontend ignores
 /frontend/.env
 backend/.env
+/docs/.$architecture.drawio.bkp
