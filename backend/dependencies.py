@@ -1,4 +1,5 @@
 import os
+from functools import lru_cache
 
 from fastapi import Depends
 
@@ -11,6 +12,7 @@ from services.rome import RomeService
 from services.wttj import WelcomeService
 
 
+@lru_cache()
 def get_rome_service():
     ft_id = os.environ.get("FT_CLIENT_ID")
     ft_secret = os.environ.get("FT_CLIENT_SECRET")
@@ -18,12 +20,14 @@ def get_rome_service():
     return RomeService(ft_id, ft_secret)
 
 
+@lru_cache()
 def get_lba_service():
     lba_key = os.environ.get("LBA_API_KEY")
 
     return LaBonneAlternanceService(lba_key)
 
 
+@lru_cache()
 def get_wttj_service():
     wttj_app_id = os.environ.get("WTTJ_APP_ID")
     wttj_api_key = os.environ.get("WTTJ_API_KEY")
@@ -31,14 +35,17 @@ def get_wttj_service():
     return WelcomeService(wttj_app_id, wttj_api_key)
 
 
+@lru_cache()
 def get_cache_service():
     return CacheService()
 
 
+@lru_cache()
 def get_apec_service():
     return ApecService()
 
 
+@lru_cache()
 def get_data_service():
     return DataService()
 
