@@ -36,7 +36,6 @@ This project utilizes a modern Python stack and cloud-native technologies.
 * **Framework:** FastAPI
 * **Server:** Uvicorn
 * **Data Storage:** Google Cloud Firestore, BigQuery
-* **Search Integration:** Algolia
 * **Testing:** Pytest (Asyncio)
 
 ### Frontend
