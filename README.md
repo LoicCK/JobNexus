@@ -1,170 +1,149 @@
 # JobNexus
 
-JobNexus is an **Apprenticeship** job aggregation platform that consolidates listings from multiple French job boards (APEC, La Bonne Alternance, Welcome to the Jungle) into a unified interface. It uses ROME codes to standardize job categories across different providers.
+[![Python](https://img.shields.io/badge/Python-3.14-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.122-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.53-FF4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![GCP](https://img.shields.io/badge/Google_Cloud-Deployed-4285F4.svg?style=for-the-badge&logo=google-cloud&logoColor=white)](https://cloud.google.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-```mermaid
-graph TD
-    User((User))
-    
-    subgraph GCP [Google Cloud Platform]
-        Frontend[Streamlit Frontend]
-        Backend[FastAPI Backend]
-    end
+JobNexus is an apprenticeship job aggregation platform designed to consolidate listings from multiple French job boards into a single, unified interface. By integrating data from **APEC**, **La Bonne Alternance**, and **Welcome to the Jungle**, it provides a centralized search engine for job seekers.
 
-    subgraph Providers [Job Providers]
-        direction LR
-        APEC
-        LBA[La Bonne Alternance]
-        WTTJ[Welcome to the Jungle]
-    end
-
-    User -- HTTPS --> Frontend
-    Frontend -- REST API --> Backend
-    
-    Backend -. Fetch Data .-> APEC
-    Backend -. Fetch Data .-> LBA
-    Backend -. Fetch Data .-> WTTJ
-```
+The system utilizes **ROME codes** to standardize job categories across different providers and implements a caching layer to optimize performance and reduce external API calls.
 
 ## Architecture
 
-The project is divided into three main components:
+JobNexus operates on a microservices architecture hosted on **Google Cloud Platform**.
 
-* **Backend**: A FastAPI application that orchestrates data fetching, normalization, and caching.
+<p align="center">
+  <img src="docs/architecture.svg" alt="JobNexus Architecture" width="800">
+</p>
 
-* **Frontend**: A Streamlit application providing a user-friendly interface to search and view jobs.
+The system consists of three main components:
+1.  **Frontend (Streamlit):** Provides the user interface for searching and visualizing job data.
+2.  **Backend (FastAPI):** Acts as an orchestrator that fetches, normalizes, and caches data from external providers.
+3.  **Infrastructure (Terraform):** Manages the deployment of resources on Google Cloud Run and API Gateway.
 
-* **Infrastructure**: Managed via Terraform on Google Cloud Platform (Cloud Run, API Gateway).
+## Tech Stack
 
-### Tech Stack
+This project utilizes a modern Python stack and cloud-native technologies.
 
-* **Language**: Python 3.14
+### Core
+* **Language:** Python 3.14
+* **Package Manager:** Poetry
 
-* **Package Manager**: Poetry
+### Backend
+* **Framework:** FastAPI
+* **Server:** Uvicorn
+* **Data Storage:** Google Cloud Firestore, BigQuery
+* **Search Integration:** Algolia
+* **Testing:** Pytest (Asyncio)
 
-* **Backend Framework**: FastAPI
+### Frontend
+* **Framework:** Streamlit
+* **Visualization:** Plotly, Pandas
+* **Authentication:** Google Auth
 
-* **Frontend Framework**: Streamlit
+### DevOps & Infrastructure
+* **IaC:** Terraform
+* **Containerization:** Docker
+* **CI/CD:** Google Cloud Build
 
-* **Infrastructure**: Terraform, Docker, Google Cloud Run
+## Features
+
+* **Aggregated Search:** Query multiple job boards simultaneously with a single request.
+* **Orchestration Engine:** Parallel data fetching from APEC, LBA, and WTTJ to minimize latency.
+* **Geo-Spatial Filtering:** Search capabilities based on longitude, latitude, and radius.
+* **Analytics Dashboard:** Visual metrics regarding active jobs, top recruiters, and daily offer volume.
+* **Asynchronous Processing:** Background tasks for data caching and archival.
+
+## API Reference
+
+The backend exposes a RESTful API. Documentation is available at `/docs` when the server is running.
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/search` | Main orchestrator endpoint. Searches all providers by query and location. |
+| `GET` | `/opportunities` | Retrieves aggregated opportunities stored in the database. |
+| `GET` | `/lba` | Fetches jobs specifically from *La Bonne Alternance*. |
+| `GET` | `/wttj` | Fetches jobs specifically from *Welcome to the Jungle*. |
+| `GET` | `/apec` | Fetches jobs specifically from *APEC*. |
+| `GET` | `/rome` | Resolves job titles to standardized ROME codes. |
 
 ## Getting Started
 
 ### Prerequisites
 
-* [Docker](https://www.docker.com/)
-
-* [Poetry](https://python-poetry.org/)
-
-* [GCP CLI](https://cloud.google.com/sdk/docs/install) (for deployment)
+* **Docker**
+* **Poetry** (Python dependency manager)
+* **Google Cloud SDK** (Optional, for deployment)
 
 ### 1. Backend Setup
 
-The backend exposes the API endpoints used to fetch job data.
-
-1. Navigate to the backend directory:
-
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   poetry install
-   ```
-
-3. Set up environment variables:
-
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys (APEC, France Travail, etc.)
-   ```
-
-4. Run the server locally:
-
-   ```bash
-   poetry run uvicorn main:app --reload
-   ```
-
-   The API will be available at `http://localhost:8000`.
-
-### 2. Frontend Setup
-
-The frontend is a dashboard for interacting with the API.
-
-1. Navigate to the frontend directory:
-
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   poetry install
-   ```
-
-3. Set up environment variables:
-
-   ```bash
-   cp .env.example .env
-   # Ensure Backend URL is set correctly
-   ```
-
-4. Run the Streamlit app:
-
-   ```bash
-   poetry run streamlit run app.py
-   ```
-
-   The UI will be available at `http://localhost:8501`.
-
-## Docker Support
-
-Both services include Dockerfiles for containerized execution.
-
-**Build and Run Backend:**
+The backend handles all data logic and API exposure.
 
 ```bash
 cd backend
-docker build -t jobnexus-backend .
-docker run -p 8000:8080 --env-file .env jobnexus-backend
+
+# Install dependencies
+poetry install
+
+# Configure Environment
+cp .env.example .env
+# Edit .env with your API keys (APEC, France Travail, etc.)
+
+# Start the server
+poetry run uvicorn main:app --reload
 ```
 
-**Build and Run Frontend:**
+The API will be available at `http://localhost:8000`.
+
+### 2. Frontend Setup
+
+The frontend provides the dashboard interface.
 
 ```bash
 cd frontend
-docker build -t jobnexus-frontend .
-docker run -p 8080:8080 --env-file .env jobnexus-frontend
+
+# Install dependencies
+poetry install
+
+# Configure Environment
+cp .env.example .env
+# Ensure BACKEND_URL is pointing to your backend
+
+# Launch the Dashboard
+poetry run streamlit run app.py
 ```
 
-## Infrastructure & Deployment
+The UI will be accessible at `http://localhost:8501`.
+
+## Docker Support
+
+The project includes Dockerfiles for containerized execution.
+
+**Backend**
+```bash
+docker build -t jobnexus-backend ./backend
+docker run -p 8000:8080 --env-file ./backend/.env jobnexus-backend
+```
+
+**Frontend**
+```bash
+docker build -t jobnexus-frontend ./frontend
+docker run -p 8080:8080 --env-file ./frontend/.env jobnexus-frontend
+```
+
+## Infrastructure
 
 Infrastructure is managed as code using **Terraform**.
 
-1. Navigate to the terraform directory:
-
-   ```bash
-   cd terraform
-   ```
-
-2. Initialize Terraform:
-
-   ```bash
-   terraform init
-   ```
-
-3. Plan and Apply:
-
-   ```bash
-   terraform plan
-   terraform apply
-   ```
-
-**CI/CD:**
-The project uses `cloudbuild.yaml` in both backend and frontend directories to automate builds and deployments to Google Cloud Run triggers.
+```bash
+cd terraform
+terraform init
+terraform plan
+terraform apply
+```
 
 ## License
 
