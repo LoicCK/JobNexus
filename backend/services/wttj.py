@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List
 
 import httpx
@@ -10,6 +11,7 @@ class WelcomeService:
         self.app_id = wttj_app_id
         self.api_key = wttj_api_key
         self.index = "wttj_jobs_production_fr"
+        self.logger = logging.getLogger(__name__)
 
     async def search_jobs(
         self, query: str, latitude: float, longitude: float, radius: int
@@ -51,7 +53,7 @@ class WelcomeService:
             results = [self._parse_algolia_hit(hit) for hit in hits]
             return results
         except Exception as e:
-            print(f"Erreur WTTJ: {e}")
+            self.logger.error(f"WTTJ error: {e}", exc_info=True)
             return []
 
     def _parse_algolia_hit(self, hit: Dict[str, Any]) -> Job:

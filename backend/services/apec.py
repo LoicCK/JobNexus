@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 import httpx
@@ -40,6 +41,7 @@ class ApecService:
             "pointGeolocDeReference": {"distance": 0},
             "motsCles": "",
         }
+        self.logger = logging.getLogger(__name__)
 
     async def search_jobs(self, query: str, insee: str) -> List[Job]:
         code_dep = insee[:2]
@@ -63,7 +65,7 @@ class ApecService:
             response.raise_for_status()
             data = response.json()
         except Exception as e:
-            print(f"Erreur APEC: {e}")
+            self.logger.error(f"APEC failed: {str(e)}", exc_info=True)
             return []
 
         resultats = data.get("resultats", [])
