@@ -47,7 +47,6 @@ class CacheService:
         cached_date = data["expire_at"]
         time_since_exp = current_date - cached_date
         if time_since_exp.total_seconds() > 0:
-            print("Expired cache")
             return None
         jobs_dicts = data.get("jobs", [])
         return [Job.model_validate(j) for j in jobs_dicts]

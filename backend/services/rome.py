@@ -1,3 +1,4 @@
+import logging
 from time import time
 from typing import List
 
@@ -14,6 +15,7 @@ class RomeService:
         self.url = "https://api.francetravail.io/partenaire/rome-metiers/v1/metiers/appellation/requete"
         self.token = None
         self.expiration_time = -1
+        self.logger = logging.getLogger(__name__)
 
     async def search_rome(self, query: str) -> List[RomeCode]:
         if time() >= self.expiration_time:
@@ -34,7 +36,7 @@ class RomeService:
                 response.raise_for_status()
                 data = response.json()
             except Exception as e:
-                print(f"Erreur OAuth ROME: {e}")
+                self.logger.error(f"OAuth ROME error: {e}", exc_info=True)
                 return []
 
             self.token = data["access_token"]
@@ -49,7 +51,7 @@ class RomeService:
             response.raise_for_status()
             data = response.json()
         except Exception as e:
-            print(f"Erreur API ROME: {e}")
+            self.logger.error(f"API ROME error: {e}", exc_info=True)
             return []
 
         if data["totalResultats"] == 0:

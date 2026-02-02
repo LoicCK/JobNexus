@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List, Optional
 
 import httpx
@@ -9,6 +10,7 @@ class LaBonneAlternanceService:
     def __init__(self, api_key: str):
         self.api_key = api_key
         self.url = "https://labonnealternance.apprentissage.beta.gouv.fr/api/v1/jobs"
+        self.logger = logging.getLogger(__name__)
 
     async def search_jobs(
         self, latitude: float, longitude: float, radius: int, insee: str, romes: str
@@ -34,7 +36,7 @@ class LaBonneAlternanceService:
             response.raise_for_status()
             data = response.json()
         except Exception as e:
-            print(f"Erreur LBA: {e}")
+            self.logger.error(f"LBA error: {e}", exc_info=True)
             return []
 
         results = []
@@ -67,7 +69,7 @@ class LaBonneAlternanceService:
                 source="LBA",
             )
         except Exception as e:
-            print(f"Skipping PE job: {e}")
+            self.logger.error(f"Skipping PE job: {e}", exc_info=True)
             return None
 
     def _parse_matcha_job(self, item: Dict[str, Any]) -> Optional[Job]:
@@ -97,5 +99,5 @@ class LaBonneAlternanceService:
                 source="LBA",
             )
         except Exception as e:
-            print(f"Skipping Matcha job: {e}")
+            self.logger.error(f"Skipping Matcha job: {e}", exc_info=True)
             return None
