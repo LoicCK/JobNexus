@@ -28,3 +28,5 @@ cloudbuild.yaml
 gcp_credentials.json
 terraform.tfstate
 terraform.tfstate.backup
+
+tests/
