@@ -132,3 +132,4 @@ generated.tf
 /frontend/.env
 backend/.env
 /docs/.$architecture.drawio.bkp
+/.python-version
